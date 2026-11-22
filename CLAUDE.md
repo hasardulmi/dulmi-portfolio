@@ -40,7 +40,7 @@ A personal portfolio website for **Dulmi Hettiarachchi**, Junior QA Engineer (Sr
 | Icons | Inline SVG sprite (`src/data/icons.ts`, `IconSprite.astro`, `Icon.astro`) | No emoji icons |
 | Testing | Playwright (smoke + accessibility with `@axe-core/playwright`), `astro check`, Prettier, ESLint | She is a QA engineer — tests are part of the showcase |
 | CI | GitHub Actions: build + lint + Playwright on every push | Show the green badge in the README |
-| Hosting | Vercel (custom domain later) | GitHub Pages is the fallback |
+| Hosting | Vercel, live at https://dulmi-portfolio.vercel.app (`site` in `astro.config.mjs`; custom domain later) | GitHub Pages is the fallback |
 
 Do not add new dependencies without asking first and explaining why.
 
@@ -217,4 +217,4 @@ Download CV buttons link to `/Dulmi-Hettiarachchi-CV.pdf` and open in a new tab 
 
 **CV PDF:** `public/Dulmi-Hettiarachchi-CV.pdf`
 
-**Pending from Dulmi (leave as TODO):** GitHub repos to feature · public QA project(s) · Dark patterns research details · photo (optional, `src/assets/dulmi.jpg`; added, confirm it is the one to use) · custom domain · her real test cases and bug reports in `docs/qa/`.
+**Pending from Dulmi (leave as TODO):** GitHub repos to feature · public QA project(s) · Dark patterns research details · photo (optional, `src/assets/dulmi.jpg`; added, confirm it is the one to use) · custom domain (live on dulmi-portfolio.vercel.app until then; change only `site` in `astro.config.mjs`) · her real test cases and bug reports in `docs/qa/`.

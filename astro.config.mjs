@@ -18,7 +18,8 @@ const root = fileURLToPath(new URL(".", import.meta.url)).replace(
 // https://astro.build/config
 export default defineConfig({
   root,
-  // TODO: site: "https://<custom-domain>" once the domain is known.
+  // Live site. Used for the canonical URL, Open Graph, sitemap and JSON-LD.
+  site: "https://dulmi-portfolio.vercel.app",
   vite: {
     plugins: [tailwindcss()],
   },

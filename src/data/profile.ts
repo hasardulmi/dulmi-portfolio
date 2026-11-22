@@ -607,7 +607,8 @@ export const profile = {
   },
 
   // TODO: Research ("Dark patterns"): add only after Dulmi provides the details.
-  // TODO: custom domain: pending.
+  // Live at https://dulmi-portfolio.vercel.app (astro.config.mjs `site`).
+  // TODO: custom domain: pending; when it is set, change `site` only.
 };
 
 export type Profile = typeof profile;
