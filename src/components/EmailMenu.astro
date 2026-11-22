@@ -1,0 +1,406 @@
+---
+/**
+ * Email trigger with a small menu: Open in Gmail, Open email app, Copy email
+ * address. A plain mailto: link does nothing on computers without a default
+ * email app, so the menu offers alternatives.
+ *
+ * Without JS the trigger is an ordinary mailto: link and the menu stays hidden.
+ * With JS the trigger becomes a menu button (aria-haspopup="menu").
+ */
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+
+interface Props {
+  /** Unique per instance, used for the menu id. */
+  id: string;
+  /** "icon": round icon button with the address beside it (hero).
+   *  "card": contact card with icon, label and address (contact section). */
+  variant: "icon" | "card";
+}
+
+const { id, variant } = Astro.props;
+const { email, gmail } = profile.contact;
+const menuId = `email-menu-${id}`;
+---
+
+<span class:list={["email", `as-${variant}`]} data-email>
+  {variant === "icon" ? (
+    <>
+      <a
+        class="trigger"
+        href={`mailto:${email}`}
+        aria-label="Email"
+        data-email-trigger
+      >
+        <Icon name="mail" />
+      </a>
+      <span class="addr">{email}</span>
+    </>
+  ) : (
+    <a class="trigger" href={`mailto:${email}`} data-email-trigger>
+      <Icon name="mail" />
+      Email <small>{email}</small>
+    </a>
+  )}
+  <span class="copied" role="status" data-copied></span>
+
+  <div
+    class="menu"
+    id={menuId}
+    role="menu"
+    aria-label="Email options"
+    hidden
+    data-email-menu
+  >
+    <a
+      role="menuitem"
+      tabindex="-1"
+      href={gmail}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Icon name="external" />
+      Open in Gmail<span class="sr-only">{" (opens in a new tab)"}</span>
+    </a>
+    <a role="menuitem" tabindex="-1" href={`mailto:${email}`}>
+      <Icon name="mail" />
+      Open email app
+    </a>
+    <button type="button" role="menuitem" tabindex="-1" data-copy={email}>
+      <Icon name="copy" />
+      Copy email address
+    </button>
+  </div>
+</span>
+
+<script>
+  type Instance = { close: (returnFocus: boolean) => void };
+  const instances: Instance[] = [];
+  const COPIED_MS = 2000;
+
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Older browsers or blocked clipboard API: fall back to a hidden textarea.
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.append(ta);
+      ta.select();
+      let ok: boolean;
+      try {
+        ok = document.execCommand("copy");
+      } catch {
+        ok = false;
+      }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-email]").forEach((root) => {
+    const trigger = root.querySelector<HTMLAnchorElement>(
+      "[data-email-trigger]",
+    )!;
+    const menu = root.querySelector<HTMLElement>("[data-email-menu]")!;
+    const status = root.querySelector<HTMLElement>("[data-copied]")!;
+    const items = [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+    let statusTimer: number | undefined;
+
+    // Escape ancestors with overflow: hidden or transforms (hero, cards).
+    document.body.append(menu);
+
+    trigger.setAttribute("role", "button");
+    trigger.setAttribute("aria-haspopup", "menu");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-controls", menu.id);
+
+    const isOpen = () => !menu.hidden;
+
+    // Below the trigger if it fits, otherwise above; always inside the screen.
+    const place = () => {
+      const r = trigger.getBoundingClientRect();
+      const gap = 8;
+      const edge = 8;
+      const { offsetWidth: w, offsetHeight: h } = menu;
+      let top = r.bottom + gap;
+      if (top + h > innerHeight - edge && r.top - gap - h >= edge) {
+        top = r.top - gap - h;
+      }
+      const left = Math.min(Math.max(edge, r.left), innerWidth - w - edge);
+      menu.style.top = `${Math.round(top)}px`;
+      menu.style.left = `${Math.round(left)}px`;
+    };
+
+    const focusItem = (i: number) =>
+      items[(i + items.length) % items.length].focus();
+
+    const close = (returnFocus: boolean) => {
+      if (!isOpen()) return;
+      menu.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      removeEventListener("scroll", place);
+      if (returnFocus) trigger.focus();
+    };
+
+    const open = (focusIndex: number) => {
+      instances.forEach((other) => other.close(false));
+      menu.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      place();
+      addEventListener("scroll", place, { passive: true });
+      focusItem(focusIndex);
+    };
+
+    instances.push({ close });
+
+    trigger.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (isOpen()) close(true);
+      else open(0);
+    });
+
+    trigger.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.key === "ArrowDown") {
+        e.preventDefault();
+        open(0);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        open(items.length - 1);
+      }
+    });
+
+    menu.addEventListener("keydown", (e) => {
+      const i = items.indexOf(document.activeElement as HTMLElement);
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          focusItem(i + 1);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          focusItem(i - 1);
+          break;
+        case "Home":
+          e.preventDefault();
+          focusItem(0);
+          break;
+        case "End":
+          e.preventDefault();
+          focusItem(items.length - 1);
+          break;
+        case "Escape":
+          e.preventDefault();
+          close(true);
+          break;
+        case "Tab":
+          // Hand focus back to the trigger; the browser then moves on from there.
+          close(true);
+          break;
+        case " ":
+          // Space activates links too, like the menu button pattern expects.
+          if (document.activeElement instanceof HTMLAnchorElement) {
+            e.preventDefault();
+            document.activeElement.click();
+          }
+          break;
+      }
+    });
+
+    // Choosing a link closes the menu (the link itself still opens).
+    menu
+      .querySelectorAll("a")
+      .forEach((a) => a.addEventListener("click", () => close(true)));
+
+    menu
+      .querySelector<HTMLButtonElement>("[data-copy]")
+      ?.addEventListener("click", async (e) => {
+        const text = (e.currentTarget as HTMLElement).dataset.copy ?? "";
+        const ok = await copyText(text);
+        close(true);
+        status.textContent = ok ? "Copied!" : "Couldn't copy";
+        clearTimeout(statusTimer);
+        statusTimer = window.setTimeout(() => {
+          status.textContent = "";
+        }, COPIED_MS);
+      });
+
+    // Outside click closes.
+    document.addEventListener("pointerdown", (e) => {
+      const target = e.target as Node;
+      if (isOpen() && !menu.contains(target) && !trigger.contains(target)) {
+        close(false);
+      }
+    });
+
+    addEventListener("resize", () => close(false));
+  });
+</script>
+
+<style>
+  .email {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Hero: round icon button, address beside it */
+  .as-icon .trigger {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--ink);
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      transform 0.2s;
+  }
+
+  .as-icon .trigger:hover,
+  .as-icon .trigger[aria-expanded="true"] {
+    border-color: var(--g);
+    color: var(--g);
+  }
+
+  .as-icon .trigger:hover {
+    transform: translateY(-3px);
+  }
+
+  .addr {
+    color: var(--mute);
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Contact: full card */
+  .as-card {
+    display: flex;
+    height: 100%;
+  }
+
+  .as-card .trigger {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    color: var(--ink);
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      transform 0.2s;
+  }
+
+  .as-card .trigger:hover,
+  .as-card .trigger[aria-expanded="true"] {
+    border-color: var(--g);
+  }
+
+  .as-card .trigger:hover {
+    transform: translateY(-3px);
+  }
+
+  .as-card .trigger :global(.i) {
+    color: var(--g);
+  }
+
+  .as-card small {
+    color: var(--mute);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  /* "Copied!" confirmation, announced politely by role="status". */
+  .copied {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--g);
+    color: var(--gtxt);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .copied:empty {
+    display: none;
+  }
+
+  .as-card .copied {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    z-index: 2;
+    translate: -50% 0;
+  }
+
+  /* Menu (moved to <body> by the script, so it is positioned to the viewport) */
+  .menu {
+    position: fixed;
+    z-index: 70;
+    display: grid;
+    min-width: 230px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card);
+    box-shadow: 0 20px 44px -18px var(--shadow);
+    animation: menu-in 0.15s ease-out;
+  }
+
+  .menu[hidden] {
+    display: none;
+  }
+
+  .menu [role="menuitem"] {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    font: 500 15px var(--font-sans-stack);
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .menu [role="menuitem"] :global(.i) {
+    width: 18px;
+    height: 18px;
+    color: var(--g);
+  }
+
+  .menu [role="menuitem"]:hover,
+  .menu [role="menuitem"]:focus-visible {
+    background: var(--g2);
+  }
+
+  .menu [role="menuitem"]:focus-visible {
+    outline-offset: -3px;
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+</style>

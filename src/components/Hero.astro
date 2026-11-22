@@ -4,6 +4,7 @@ import path from "node:path";
 import { profile } from "../data/profile";
 import Icon from "./Icon.astro";
 import BugButton from "./BugButton.astro";
+import EmailMenu from "./EmailMenu.astro";
 
 const { hero, contact } = profile;
 
@@ -107,9 +108,7 @@ const [first, last] = [
           </a>
         </li>
         <li>
-          <a href={`mailto:${contact.email}`} aria-label="Email">
-            <Icon name="mail" />
-          </a>
+          <EmailMenu id="hero" variant="icon" />
         </li>
       </ul>
       <p class="huntnote js-only">
@@ -323,6 +322,8 @@ const [first, last] = [
 
   .social {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 10px;
     margin: 0;
     padding: 0;

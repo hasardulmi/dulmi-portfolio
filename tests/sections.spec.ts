@@ -102,6 +102,7 @@ test.describe("Page structure and content rules", () => {
       profile.contact.github,
       profile.contact.medium,
       `mailto:${profile.contact.email}`,
+      profile.contact.gmail,
       ...profile.articles.map((a) => a.url),
       ...profile.certifications.map((c) => c.url),
       ...profile.caseStudy.links.map((l) => l.href),
@@ -142,7 +143,6 @@ test.describe("Hero", () => {
       ["LinkedIn profile", profile.contact.linkedin],
       ["GitHub profile", profile.contact.github],
       ["Medium articles", profile.contact.medium],
-      ["Email", `mailto:${profile.contact.email}`],
     ]) {
       await expect(
         hero.getByRole("link", { name, exact: true }),
@@ -414,12 +414,20 @@ test.describe("Education, writing, contact", () => {
   });
 
   test("contact links", async ({ page }) => {
-    const links = section(page, "contact").getByRole("link");
-    await expect(links).toHaveCount(4);
-    await expect(links.nth(0)).toHaveAttribute(
-      "href",
-      `mailto:${profile.contact.email}`,
-    );
+    const contact = section(page, "contact");
+    // Email is a menu button (see email.spec.ts); the rest are links.
+    await expect(
+      contact.getByRole("button", { name: `Email ${profile.contact.email}` }),
+    ).toBeVisible();
+    const links = contact.getByRole("link");
+    await expect(links).toHaveCount(3);
+    for (const [i, href] of [
+      profile.contact.linkedin,
+      profile.contact.github,
+      profile.contact.medium,
+    ].entries()) {
+      await expect(links.nth(i)).toHaveAttribute("href", href);
+    }
   });
 });
 

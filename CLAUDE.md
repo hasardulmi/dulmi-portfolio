@@ -120,6 +120,8 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 
 Download CV buttons link to `/Dulmi-Hettiarachchi-CV.pdf` and open in a new tab (`rel="noopener noreferrer"`).
 
+**Email links** (hero icon, contact card) use `EmailMenu.astro`, never a bare `mailto:`: a menu button opens an accessible menu with "Open in Gmail" (compose link, new tab), "Open email app" (`mailto:`) and "Copy email address" (shows "Copied!" for 2 seconds). It closes on Escape, outside click and after a choice, and the address stays visible as text next to the button. Without JS the trigger falls back to a plain `mailto:` link.
+
 ## 7. Quality bar (non-negotiable)
 
 - **Accessibility:** semantic HTML (`header`, `nav`, `main`, `section`, `footer`), one H1, logical heading order, skip-to-content link, alt text, labelled links ("LinkedIn profile", not "click here"), keyboard-navigable (tabs with arrow/Home/End keys; bug buttons are real buttons; the finish dialog is a native `<dialog>` that traps focus and closes with Esc), visible focus, `lang="en"`.

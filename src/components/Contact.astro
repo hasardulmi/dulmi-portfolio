@@ -1,15 +1,11 @@
 ---
 import { profile } from "../data/profile";
 import Icon from "./Icon.astro";
+import EmailMenu from "./EmailMenu.astro";
 
 const { contact } = profile;
+// Email is first, rendered by EmailMenu (Gmail / email app / copy).
 const items = [
-  {
-    icon: "mail",
-    label: "Email",
-    detail: contact.email,
-    href: `mailto:${contact.email}`,
-  },
   {
     icon: "in",
     label: "LinkedIn",
@@ -39,6 +35,9 @@ const items = [
       </h2>
       <p class="sub">{profile.contactLine}</p>
       <ul class="clist">
+        <li>
+          <EmailMenu id="contact" variant="card" />
+        </li>
         {items.map((c) => (
           <li>
             <a href={c.href}>

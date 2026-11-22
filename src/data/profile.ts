@@ -7,8 +7,12 @@
  */
 import type { IconName } from "./icons";
 
+const EMAIL = "hasardulmi@gmail.com";
+
 export interface Contact {
   email: string;
+  /** Gmail compose link, for visitors without a default email app. */
+  gmail: string;
   linkedin: string;
   /** Short display form of the LinkedIn handle. */
   linkedinHandle: string;
@@ -130,7 +134,8 @@ export const profile = {
   photo: "/dulmi.jpg",
 
   contact: {
-    email: "hasardulmi@gmail.com",
+    email: EMAIL,
+    gmail: `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL}`,
     linkedin: "https://www.linkedin.com/in/dulmi-hasarangi-21333b280",
     linkedinHandle: "dulmi-hasarangi",
     github: "https://github.com/hasardulmi",
