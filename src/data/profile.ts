@@ -130,8 +130,8 @@ export const profile = {
   headline: "Junior QA Engineer | Manual Testing | API Testing | Agile",
   location: "Sri Lanka",
   cvUrl: "/Dulmi-Hettiarachchi-CV.pdf",
-  /** Used in the hero frame only when this file exists in public/. */
-  photo: "/dulmi.jpg",
+  // Photo: src/assets/dulmi.jpg, optional. Hero.astro uses it when the file
+  // exists, otherwise the initials. TODO: confirm the photo with Dulmi.
 
   contact: {
     email: EMAIL,
@@ -148,7 +148,8 @@ export const profile = {
     "QA Engineer with 6 months of hands-on experience in manual and functional testing of web-based applications; BSc (Hons) Management and Information Technology undergraduate at the University of Kelaniya, final-year exams completed. Skilled in test case design, regression testing, defect tracking, RBAC validation and REST API testing with Postman. Strong understanding of STLC, bug life cycle and Agile collaboration, with a Java (OOP) foundation.",
 
   hero: {
-    tag: "Open to QA roles",
+    tag: "Open to QA roles · available now",
+    hello: "Hello, I'm",
     rolePrefix: "Junior QA Engineer",
     roleLabel:
       "Junior QA Engineer specialising in manual testing, API testing, RBAC validation and regression testing",
@@ -160,18 +161,21 @@ export const profile = {
     ],
     intro:
       "I make sure web apps work the way users expect, and that every user sees only what they should. At MobiOS Private Limited I tested two multi-role platforms end to end, from test cases to regression before release. I have just completed my final-year exams and I'm ready to start full time.",
-    /** The 9 skills around the photo, in clockwise order from the top. */
-    orbit: [
+    /** Decorative scene text (laptop + phone mock-up, aria-hidden). */
+    mock: {
+      eyebrow: "Junior QA Engineer",
+      title: ["Finding bugs", "before", "your users do"],
+      text: "Manual, API and RBAC testing for multi-role web apps.",
+      tools: ["Postman", "REST APIs", "JWT", "Git", "Java"],
+    },
+    chips: ["Tested on desktop", "Tested on mobile"],
+    services: [
       { icon: "list", label: "Manual testing" },
-      { icon: "api", label: "Postman" },
-      { icon: "code", label: "REST APIs" },
-      { icon: "shield", label: "RBAC" },
+      { icon: "api", label: "API testing" },
+      { icon: "shield", label: "RBAC & security" },
       { icon: "loop", label: "Regression" },
-      { icon: "verified", label: "JWT" },
-      { icon: "flow", label: "STLC" },
-      { icon: "team", label: "Agile" },
-      { icon: "book", label: "Java" },
     ] satisfies IconItem[],
+    tagline: ["Careful", "Curious", "Clear", "Reliable"],
   },
 
   about: {

@@ -1,152 +1,261 @@
 ---
-import fs from "node:fs";
-import path from "node:path";
+import { getImage } from "astro:assets";
+import type { ImageMetadata } from "astro";
 import { profile } from "../data/profile";
+import { keyFigures } from "../data/figures";
 import Icon from "./Icon.astro";
 import BugButton from "./BugButton.astro";
 import EmailMenu from "./EmailMenu.astro";
 
 const { hero, contact } = profile;
+const figures = keyFigures(profile);
 
-// Use public/dulmi.jpg only if it exists, decided at build time so the
-// browser never requests a missing file. TODO: photo (optional), pending.
-const hasPhoto = fs.existsSync(
-  path.join(process.cwd(), "public", profile.photo.slice(1)),
+// Her photo is optional: src/assets/dulmi.jpg is used only when it exists,
+// decided at build time, so the browser never requests a missing file. The
+// original is large, so it is resized to a small WebP for the photo spots.
+const photos = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/dulmi.jpg",
+  { eager: true },
 );
-
-const orbitList = hero.orbit.map((s) => s.label.toLowerCase());
-const orbitText = `${orbitList.slice(0, -1).join(", ")} and ${orbitList.at(-1)}`;
-const photoLabel = hasPhoto
-  ? `Photo of ${profile.shortName}, surrounded by her core skills: ${orbitText}`
-  : `${profile.shortName}'s initials, surrounded by her core skills: ${orbitText}`;
-
-// The radar sweep takes 9s per turn and starts at the top, clockwise. Each
-// skill lights up when the sweep passes it.
-const SWEEP_SECONDS = 9;
-const slots = hero.orbit.map((skill, i) => {
-  const fromTop = (i * 360) / hero.orbit.length;
-  return {
-    ...skill,
-    angle: fromTop - 90,
-    delay: (fromTop / 360) * SWEEP_SECONDS,
-  };
-});
+const photoSource = Object.values(photos)[0]?.default;
+const photo = photoSource
+  ? await getImage({ src: photoSource, width: 480, format: "webp" })
+  : undefined;
 
 const [first, last] = [
   profile.name.split(" ")[0],
   profile.name.split(" ").slice(1).join(" "),
 ];
+const [mockA, mockGold, mockB] = hero.mock.title;
 ---
 
 <section class="hero" id="top" aria-labelledby="hero-title" data-hero>
   <div class="spot" aria-hidden="true"></div>
-  <BugButton section="top" position="top:18%;left:44%" />
-  <div class="wrap grid">
-    <div class="text">
-      <span class="open">
-        <i aria-hidden="true"></i>
-        {hero.tag}
-      </span>
-      <h1 class="hi" id="hero-title">
-        <span class="w" style="--d:0s">
-          Hi,
-        </span>{" "}
-        <span class="w" style="--d:.08s">
-          I'm
-        </span>{" "}
-        <span class="w hl" style="--d:.16s">
+  <svg
+    class="streaks"
+    aria-hidden="true"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="none"
+  >
+    <defs>
+      <linearGradient id="streak-grad" x1="0" x2="1">
+        <stop offset="0" stop-color="#34d399" stop-opacity="0"></stop>
+        <stop offset=".55" stop-color="#34d399" stop-opacity=".9"></stop>
+        <stop offset="1" stop-color="#e9c98f" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    <path class="st s1" d="M-50 760 C 400 640, 900 900, 1500 560"></path>
+    <path class="st s2" d="M-50 820 C 500 700, 1000 880, 1500 660"></path>
+    <path class="st s3" d="M1500 120 C 1100 260, 700 120, 300 220"></path>
+  </svg>
+  <div class="dots" aria-hidden="true"></div>
+  <BugButton section="top" position="top:20%;left:12%" />
+
+  <div class="wrap hwrap">
+    <span class="open">
+      <i aria-hidden="true"></i>
+      {hero.tag}
+    </span>
+    <h1 class="hi" id="hero-title">
+      <span class="hello">
+        <span class="line" aria-hidden="true"></span>
+        {hero.hello}
+        <span class="line flip" aria-hidden="true"></span>
+      </span>{" "}
+      <span class="name">
+        <span class="w goldtext" style="--d:.08s">
           {first}
         </span>{" "}
-        <br />
-        <span class="w" style="--d:.26s">
+        <span class="w" style="--d:.16s">
           {last}
         </span>
-      </h1>
-      <p class="role">
-        <span class="sr-only">{hero.roleLabel}</span>
-        <span aria-hidden="true">
-          {hero.rolePrefix}
-          <span class="sep"> · </span>
-          <span
-            class="type"
-            data-type
-            data-words={JSON.stringify(hero.typewriter)}
-          >
-            {hero.typewriter[0]}
-          </span>
-        </span>
-      </p>
-      <p class="lede">{hero.intro}</p>
-      <div class="cta">
-        <a class="btn solid" href="#projects">
-          View my work
-        </a>
-        <a
-          class="btn"
-          href={profile.cvUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+      </span>
+    </h1>
+    <p class="role">
+      <span class="sr-only">{hero.roleLabel}</span>
+      <span aria-hidden="true">
+        {hero.rolePrefix}
+        <span class="sep"> · </span>
+        <span
+          class="type"
+          data-type
+          data-words={JSON.stringify(hero.typewriter)}
         >
-          <Icon name="down" />
-          Download CV<span class="sr-only">{" (PDF, opens in a new tab)"}</span>
-        </a>
-      </div>
-      <ul class="social">
-        <li>
-          <a href={contact.linkedin} aria-label="LinkedIn profile">
-            <Icon name="in" />
-          </a>
-        </li>
-        <li>
-          <a href={contact.github} aria-label="GitHub profile">
-            <Icon name="gh" />
-          </a>
-        </li>
-        <li>
-          <a href={contact.medium} aria-label="Medium articles">
-            <Icon name="pen" />
-          </a>
-        </li>
-        <li>
-          <EmailMenu id="hero" variant="icon" />
-        </li>
-      </ul>
-      <p class="huntnote js-only">
-        <Icon name="bug" />5 bugs are hiding on this page. Can you find them?
-      </p>
+          {hero.typewriter[0]}
+        </span>
+      </span>
+    </p>
+    <p class="lede">{hero.intro}</p>
+    <div class="cta">
+      <a class="btn solid" href="#projects">
+        View my work
+        <Icon name="arrow" />
+      </a>
+      <a
+        class="btn glassbtn"
+        href={profile.cvUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Icon name="down" />
+        Download CV<span class="sr-only">{" (PDF, opens in a new tab)"}</span>
+      </a>
     </div>
+    <ul class="social">
+      <li>
+        <a href={contact.linkedin} aria-label="LinkedIn profile">
+          <Icon name="in" />
+        </a>
+      </li>
+      <li>
+        <a href={contact.github} aria-label="GitHub profile">
+          <Icon name="gh" />
+        </a>
+      </li>
+      <li>
+        <a href={contact.medium} aria-label="Medium articles">
+          <Icon name="pen" />
+        </a>
+      </li>
+      <li>
+        <EmailMenu id="hero" variant="icon" />
+      </li>
+    </ul>
+    <p class="huntnote js-only">
+      <Icon name="bug" />5 bugs are hiding on this page. Can you find them?
+    </p>
 
-    <div class="photo" role="img" aria-label={photoLabel} data-photo>
-      <div class="ring"></div>
-      <div class="disc">
-        <div class="face">
-          {hasPhoto ? (
-            <img
-              src={profile.photo}
-              alt=""
-              width="400"
-              height="400"
-              decoding="async"
-            />
-          ) : (
-            <strong>{profile.initials}</strong>
-          )}
-          <div class="scan"></div>
-        </div>
-      </div>
-      <div class="sweep"></div>
-      <div class="orbit">
-        {slots.map((s) => (
-          <div class="slot" style={`--a:${s.angle}deg`}>
-            <div class="sk" style={`animation-delay:${s.delay}s`}>
-              <span class="ping" />
-              <Icon name={s.icon} />
-              {s.label}
+    {/* Decorative device scene: an illustration of this portfolio. */}
+    <div class="scene" aria-hidden="true" data-scene>
+      <div class="glow"></div>
+      <div class="laptop">
+        <div class="screen">
+          <div class="ui">
+            <div class="unav">
+              <b>
+                <i>{profile.initials}</i>
+                {profile.shortName}
+              </b>
+              <span>Home</span>
+              <span>About</span>
+              <span>Skills</span>
+              <span>Projects</span>
+              <em>Contact</em>
+            </div>
+            <div class="ubody">
+              <div class="utext">
+                <small>{hero.mock.eyebrow}</small>
+                <strong>
+                  {mockA} <u>{mockGold}</u> {mockB}
+                </strong>
+                <p>{hero.mock.text}</p>
+                <div class="ubtns">
+                  <em>View my work</em>
+                  <span>Download CV</span>
+                </div>
+              </div>
+              <div class="uphoto">
+                <div class="ring2"></div>
+                <div class="ph" data-ph>
+                  {photo ? (
+                    <img
+                      src={photo.src}
+                      width={photo.attributes.width}
+                      height={photo.attributes.height}
+                      alt=""
+                      decoding="async"
+                    />
+                  ) : (
+                    <b>{profile.initials}</b>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div class="utrust">
+              <small>Core tools</small>
+              {hero.mock.tools.map((t) => (
+                <span>{t}</span>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
+        <div class="base">
+          <i></i>
+        </div>
       </div>
+      <div class="phone">
+        <div class="pscreen">
+          <div class="ph" data-ph>
+            {photo ? (
+              <img
+                src={photo.src}
+                width={photo.attributes.width}
+                height={photo.attributes.height}
+                alt=""
+                decoding="async"
+                loading="lazy"
+              />
+            ) : (
+              <b>{profile.initials}</b>
+            )}
+          </div>
+          <strong>{profile.shortName}</strong>
+          <small>{hero.mock.eyebrow}</small>
+          <em>Contact me</em>
+          <div class="plines">
+            <i></i>
+            <i></i>
+            <i></i>
+          </div>
+        </div>
+      </div>
+      {hero.chips.map((c, i) => (
+        <div class:list={["chipf", `c${i + 1}`]}>
+          <Icon name="check" />
+          {c}
+        </div>
+      ))}
     </div>
+
+    <ul class="svc" aria-label="What I test">
+      {hero.services.map((s, i) => (
+        <li class:list={["gcard", { dark: i === 1 }]}>
+          <span class="gi">
+            <Icon name={s.icon} />
+          </span>
+          <b>{s.label}</b>
+          <i aria-hidden="true" />
+        </li>
+      ))}
+    </ul>
+
+    <div class="sbar">
+      <ul class="stats" data-stats data-seen>
+        {figures.map((f) => (
+          <li>
+            <b class="goldtext tabular" data-count={f.value}>
+              {f.value}
+            </b>
+            <span aria-hidden="true">
+              {f.short[0]}
+              <br />
+              {f.short[1]}
+            </span>
+            <span class="sr-only">{f.label}</span>
+          </li>
+        ))}
+      </ul>
+      <a class="btn solid" href="#contact">
+        Contact me
+        <Icon name="arrow" />
+      </a>
+    </div>
+
+    <p class="tagline">
+      <span class="line" aria-hidden="true"></span>
+      {hero.tagline.join(" · ")}
+      <span class="line" aria-hidden="true"></span>
+    </p>
   </div>
 </section>
 
@@ -179,32 +288,32 @@ const [first, last] = [
     setTimeout(tick, 2200);
   }
 
-  // Mouse spotlight and 3D photo tilt: mouse/trackpad only, never under reduced motion.
+  // Mouse spotlight and 3D scene tilt: mouse/trackpad only, never under reduced motion.
   const hero = document.querySelector<HTMLElement>("[data-hero]");
-  const photo = document.querySelector<HTMLElement>("[data-photo]");
-  if (hero && photo && finePointer() && !reduceMotion()) {
+  const scene = document.querySelector<HTMLElement>("[data-scene]");
+  if (hero && scene && finePointer() && !reduceMotion()) {
     hero.addEventListener("pointermove", (e) => {
       const r = hero.getBoundingClientRect();
       hero.style.setProperty("--mx", `${e.clientX - r.left}px`);
       hero.style.setProperty("--my", `${e.clientY - r.top}px`);
-      const p = photo.getBoundingClientRect();
-      const x = (e.clientX - p.left) / p.width - 0.5;
-      const y = (e.clientY - p.top) / p.height - 0.5;
-      photo.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      scene.style.transform = `perspective(1400px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg)`;
     });
     hero.addEventListener("pointerleave", () => {
-      photo.style.transform = "";
+      scene.style.transform = "";
     });
   }
 </script>
 
 <style>
   .hero {
-    --mx: 70%;
-    --my: 40%;
+    --mx: 50%;
+    --my: 30%;
     position: relative;
     overflow: hidden;
-    padding: clamp(48px, 7vw, 90px) 0;
+    padding: clamp(40px, 6vw, 72px) 0 clamp(40px, 6vw, 70px);
+    text-align: center;
   }
 
   .hero::before {
@@ -223,15 +332,16 @@ const [first, last] = [
   .hero::after {
     content: "";
     position: absolute;
-    top: -140px;
-    right: -150px;
-    width: 620px;
-    height: 620px;
+    top: -200px;
+    left: 50%;
+    width: 900px;
+    height: 700px;
     background: radial-gradient(
       circle,
       color-mix(in srgb, var(--g) 22%, transparent),
       transparent 65%
     );
+    translate: -50% 0;
     pointer-events: none;
   }
 
@@ -247,12 +357,56 @@ const [first, last] = [
     pointer-events: none;
   }
 
-  .grid {
+  .streaks {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .st {
+    fill: none;
+    stroke: url(#streak-grad);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 420 1600;
+    animation: flow 7s linear infinite;
+  }
+
+  .s2 {
+    stroke-width: 1.2;
+    animation-duration: 9s;
+    animation-delay: -3s;
+  }
+
+  .s3 {
+    stroke-width: 1;
+    opacity: 0.6;
+    animation-duration: 11s;
+  }
+
+  .dots {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 45%;
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--g) 40%, transparent) 1px,
+      transparent 1.3px
+    );
+    background-size: 16px 16px;
+    mask-image: radial-gradient(ellipse at 20% 100%, #000, transparent 60%);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .hwrap {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 40px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
   }
 
@@ -277,9 +431,35 @@ const [first, last] = [
   }
 
   .hi {
-    margin: 20px 0 14px;
-    font-size: clamp(42px, 6.2vw, 72px);
+    margin: 22px 0 14px;
     font-weight: 800;
+    letter-spacing: -0.015em;
+  }
+
+  .hello {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 4px;
+    color: var(--ink);
+    font: italic 500 clamp(22px, 2.6vw, 30px) var(--font-serif-stack);
+    letter-spacing: 0;
+  }
+
+  .hello .line {
+    width: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--g));
+  }
+
+  .hello .flip {
+    transform: scaleX(-1);
+  }
+
+  .name {
+    display: block;
+    font-size: clamp(40px, 7vw, 84px);
   }
 
   .w {
@@ -310,20 +490,22 @@ const [first, last] = [
   }
 
   .lede {
-    max-width: 54ch;
-    margin-bottom: 28px;
+    max-width: 60ch;
+    margin: 0 auto 28px;
     color: var(--mute);
     font-size: 17px;
   }
 
   .cta {
-    margin-bottom: 26px;
+    justify-content: center;
+    margin-bottom: 22px;
   }
 
   .social {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     margin: 0;
     padding: 0;
@@ -337,6 +519,7 @@ const [first, last] = [
     height: 44px;
     border: 1px solid var(--line);
     border-radius: 50%;
+    background: var(--card);
     color: var(--ink);
     transition:
       border-color 0.2s,
@@ -350,7 +533,27 @@ const [first, last] = [
     transform: translateY(-3px);
   }
 
+  .huntnote {
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 18px 0 0;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  :global(.js) .huntnote {
+    display: flex;
+  }
+
+  .huntnote :global(.i) {
+    width: 18px;
+    height: 18px;
+    color: var(--amber);
+  }
+
   .open,
+  .hello,
   .role,
   .lede,
   .cta,
@@ -376,162 +579,546 @@ const [first, last] = [
     animation-delay: 0.65s;
   }
 
-  .huntnote {
-    align-items: center;
-    gap: 8px;
-    margin: 22px 0 0;
-    color: var(--mute);
-    font-size: 14px;
-  }
-
-  :global(.js) .huntnote {
-    display: flex;
-  }
-
-  .huntnote :global(.i) {
-    width: 18px;
-    height: 18px;
-    color: var(--amber);
-  }
-
-  /* Photo frame */
-  .photo {
+  /* ---------- Device scene (decorative, fixed dark "screen" colours) ---------- */
+  .scene {
     position: relative;
-    width: 100%;
-    max-width: 420px;
-    aspect-ratio: 1;
-    margin-inline: auto;
+    width: min(860px, 100%);
+    margin: 44px auto 0;
+    padding-bottom: 10px;
+    text-align: left;
     transform-style: preserve-3d;
-    transition: transform 0.2s ease-out;
+    transition: transform 0.25s ease-out;
   }
 
-  .ring {
+  .glow {
     position: absolute;
-    inset: 0;
-    border: 2px dashed color-mix(in srgb, var(--g) 45%, transparent);
-    border-radius: 50%;
-  }
-
-  .disc {
-    position: absolute;
-    inset: 7%;
-    padding: 6px;
-    border-radius: 50%;
-    background: linear-gradient(
-      150deg,
-      var(--g),
-      color-mix(in srgb, var(--g) 30%, var(--bg2))
+    right: 8%;
+    bottom: -6%;
+    left: 8%;
+    height: 40%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(47, 211, 154, 0.45),
+      transparent 65%
     );
+    filter: blur(30px);
   }
 
-  .face {
+  .laptop {
     position: relative;
-    display: grid;
-    place-items: center;
-    width: 100%;
+    width: 84%;
+    margin: 0 auto;
+    animation: float 7s ease-in-out infinite;
+  }
+
+  .screen {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    padding: 1.4%;
+    border-radius: 16px 16px 4px 4px;
+    background: linear-gradient(#1b2330, #0b0f15);
+    box-shadow:
+      0 40px 80px -40px rgba(0, 0, 0, 0.8),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .screen::before {
+    content: "";
+    position: absolute;
+    top: 0.6%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2a3340;
+    translate: -50% 0;
+  }
+
+  .ui {
+    position: relative;
     height: 100%;
     overflow: hidden;
+    border-radius: 8px;
+    background:
+      radial-gradient(
+        70% 90% at 85% 30%,
+        rgba(47, 211, 154, 0.35),
+        transparent 60%
+      ),
+      linear-gradient(160deg, #0b2238, #071423 60%);
+    color: #eef3f8;
+    font-size: clamp(6px, 1.12vw, 11.5px);
+    line-height: 1.5;
+  }
+
+  .ui::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.12),
+      transparent 35%
+    );
+    pointer-events: none;
+  }
+
+  .unav {
+    display: flex;
+    align-items: center;
+    gap: 2.2em;
+    padding: 1.6em 2.4em;
+    color: #a9b8c8;
+    font-size: 0.95em;
+  }
+
+  .unav b {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-right: auto;
+    color: #fff;
+    font-family: var(--font-head-stack);
+  }
+
+  .unav b i {
+    display: grid;
+    place-items: center;
+    width: 2em;
+    height: 2em;
+    border-radius: 0.5em;
+    background: #2fd39a;
+    color: #04241a;
+    font-size: 0.8em;
+    font-style: normal;
+  }
+
+  .unav em,
+  .ubtns em,
+  .pscreen em {
+    border-radius: 99px;
+    background: #2fd39a;
+    color: #04241a;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .unav em {
+    padding: 0.4em 1.1em;
+  }
+
+  .ubody {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    align-items: center;
+    gap: 1em;
+    padding: 1.5em 2.6em 0 4.5em;
+  }
+
+  .utext small {
+    color: #2fd39a;
+    font-size: 1em;
+    font-weight: 600;
+  }
+
+  .utext strong {
+    display: block;
+    margin: 0.35em 0 0.5em;
+    font: 700 2.4em/1.1 var(--font-head-stack);
+  }
+
+  .utext strong u {
+    background: var(--goldg);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+  }
+
+  .utext p {
+    margin: 0 0 1.2em;
+    color: #a9b8c8;
+    font-size: 1.05em;
+  }
+
+  .ubtns {
+    display: flex;
+    gap: 0.8em;
+  }
+
+  .ubtns em,
+  .ubtns span {
+    padding: 0.6em 1.2em;
+    border-radius: 99px;
+    font-weight: 600;
+  }
+
+  .ubtns span {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .uphoto {
+    position: relative;
+    justify-self: center;
+    width: 78%;
+    aspect-ratio: 1;
+  }
+
+  .ring2 {
+    position: absolute;
+    inset: -6%;
+    border: 2px dashed rgba(47, 211, 154, 0.6);
     border-radius: 50%;
-    background: var(--bg2);
+    animation: spin 30s linear infinite;
   }
 
-  .face strong {
-    color: var(--g);
-    font: 800 clamp(56px, 9vw, 96px) / 1 var(--font-head-stack);
+  .ph {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 3px solid #2fd39a;
+    border-radius: 50%;
+    background: linear-gradient(150deg, #123a3a, #0b1f33);
+    box-shadow: 0 0 40px -6px rgba(47, 211, 154, 0.7);
   }
 
-  .face img {
+  .ph img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 20%;
   }
 
-  .scan {
+  .ph b {
+    color: #2fd39a;
+    font: 800 3.4em var(--font-head-stack);
+  }
+
+  .utrust {
     position: absolute;
-    top: -40%;
-    right: 0;
-    left: 0;
-    height: 40%;
-    background: linear-gradient(
-      180deg,
-      transparent,
-      color-mix(in srgb, var(--g) 22%, transparent) 80%,
-      var(--g) 100%
-    );
-    opacity: 0.7;
-    animation: scan 3.6s ease-in-out infinite;
+    right: 2.4em;
+    bottom: 1.4em;
+    left: 2.4em;
+    display: flex;
+    align-items: center;
+    gap: 1.8em;
+    padding: 0.9em 1.4em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.8em;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cfe0ee;
+    font-weight: 600;
   }
 
-  /* Radar sweep: a lit wedge on a ring outside the frame. */
-  .sweep {
-    position: absolute;
-    inset: -7%;
-    z-index: 0;
-    border-radius: 50%;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0 300deg,
-      color-mix(in srgb, var(--g) 10%, transparent) 330deg,
-      color-mix(in srgb, var(--g) 45%, transparent) 359deg,
-      var(--g) 360deg
-    );
-    -webkit-mask: radial-gradient(
-      circle closest-side,
-      transparent 74%,
-      #000 75%
-    );
-    mask: radial-gradient(circle closest-side, transparent 74%, #000 75%);
-    pointer-events: none;
-    animation: spin 9s linear infinite;
+  .utrust small {
+    margin-right: auto;
+    color: #8da1b5;
+    font-size: 1em;
+    font-weight: 500;
   }
 
-  .orbit {
-    position: absolute;
-    inset: 0;
-    container-type: size;
-    pointer-events: none;
-  }
-
-  .slot {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: rotate(var(--a)) translateX(calc(50cqw + 6px))
-      rotate(calc(-1 * var(--a)));
-  }
-
-  .sk {
+  .base {
     position: relative;
+    width: 112%;
+    height: clamp(10px, 1.8vw, 18px);
+    margin-left: -6%;
+    border-radius: 0 0 18px 18px;
+    background: linear-gradient(#cfd6de, #7d8794 60%, #5b6470);
+  }
+
+  .base i {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 16%;
+    height: 45%;
+    border-radius: 0 0 10px 10px;
+    background: #9aa4b0;
+    translate: -50% 0;
+  }
+
+  .phone {
+    position: absolute;
+    bottom: -1%;
+    left: -3%;
+    width: 13.5%;
+    min-width: 84px;
+    aspect-ratio: 9 / 18.5;
+    padding: 4px;
+    border-radius: 18px;
+    background: linear-gradient(#e7c79a, #a57a45);
+    box-shadow: 0 30px 50px -24px rgba(0, 0, 0, 0.8);
+    rotate: -8deg;
+    animation: float 7s ease-in-out infinite;
+    animation-delay: -2s;
+  }
+
+  .pscreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5%;
+    height: 100%;
+    overflow: hidden;
+    padding: 18% 10% 10%;
+    border-radius: 14px;
+    background: linear-gradient(170deg, #0b2238, #071423);
+    color: #fff;
+    font-size: clamp(6px, 0.9vw, 10px);
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .pscreen .ph {
+    position: relative;
+    inset: auto;
+    flex: none;
+    width: 58%;
+    aspect-ratio: 1;
+  }
+
+  .pscreen .ph b {
+    font-size: 2em;
+  }
+
+  .pscreen strong {
+    font-family: var(--font-head-stack);
+    font-size: 1.4em;
+  }
+
+  .pscreen small {
+    color: #8da1b5;
+    font-size: 1em;
+  }
+
+  .pscreen em {
+    padding: 0.4em 1em;
+  }
+
+  .plines {
+    display: grid;
+    gap: 6%;
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .plines i {
+    height: 0.6em;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .plines i:nth-child(2) {
+    width: 70%;
+  }
+
+  .chipf {
+    position: absolute;
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 7px 13px;
+    padding: 8px 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: var(--card);
-    box-shadow: 0 14px 30px -18px var(--shadow);
-    font-size: 13.5px;
+    box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 0.7);
+    color: var(--ink);
+    font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
-    translate: -50% -50%;
-    animation: lit 9s linear infinite;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    animation: float 6s ease-in-out infinite;
   }
 
-  .sk :global(.i) {
+  .chipf :global(.i) {
     width: 16px;
     height: 16px;
     color: var(--g);
   }
 
-  .ping {
-    position: absolute;
-    inset: -1px;
-    border: 2px solid var(--g);
-    border-radius: 999px;
-    opacity: 0;
-    animation: ping 9s linear infinite;
-    animation-delay: inherit;
+  .c1 {
+    top: 12%;
+    right: 2%;
+  }
+
+  .c2 {
+    right: 6%;
+    bottom: 18%;
+    animation-delay: -3s;
+  }
+
+  /* ---------- Service cards + stats bar ---------- */
+  .svc {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    width: min(860px, 100%);
+    margin: -26px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gcard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--gcard);
+    box-shadow: 0 20px 40px -26px rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    transition:
+      transform 0.3s,
+      border-color 0.3s;
+    animation: rise 0.8s both;
+  }
+
+  .gcard:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .gcard:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  .gcard:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+
+  .gcard:hover {
+    border-color: var(--g);
+    transform: translateY(-6px);
+  }
+
+  /* The highlighted card keeps white text, so its fill stays dark in both
+     themes (the light theme gets a solid navy-emerald fill for contrast). */
+  .gcard.dark {
+    background: linear-gradient(160deg, #0f5a44, #0a2236);
+    color: #fff;
+  }
+
+  :global(:root[data-theme="dark"]) .gcard.dark {
+    background: linear-gradient(
+      160deg,
+      rgba(47, 211, 154, 0.25),
+      rgba(7, 20, 35, 0.85)
+    );
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .gcard.dark {
+      background: linear-gradient(
+        160deg,
+        rgba(47, 211, 154, 0.25),
+        rgba(7, 20, 35, 0.85)
+      );
+    }
+  }
+
+  .gi {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #34d9a1, #13a874);
+    color: #03241a;
+  }
+
+  .gcard b {
+    font: 600 16px var(--font-head-stack);
+  }
+
+  .gcard i {
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--g) 0 8px,
+      transparent 8px 14px
+    );
+    opacity: 0.6;
+  }
+
+  .gcard.dark i {
+    background: repeating-linear-gradient(
+      90deg,
+      #2fd39a 0 8px,
+      transparent 8px 14px
+    );
+  }
+
+  .sbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: min(860px, 100%);
+    margin-top: 18px;
+    padding: 14px 14px 14px 22px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--card);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .stats {
+    display: flex;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stats li {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 8px;
+    border-right: 1px solid var(--line);
+    text-align: left;
+  }
+
+  .stats li:last-child {
+    border-right: 0;
+  }
+
+  .stats b {
+    font: 700 30px/1.2 var(--font-head-stack);
+  }
+
+  .stats span {
+    color: var(--mute);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .tagline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 26px 0 0;
+    color: var(--gold);
+    font: 500 15px var(--font-head-stack);
+    letter-spacing: 0.12em;
+  }
+
+  .tagline .line {
+    width: 46px;
+    height: 1px;
+    background: var(--g);
   }
 
   @keyframes rise {
@@ -556,13 +1143,18 @@ const [first, last] = [
     }
   }
 
-  @keyframes scan {
-    0% {
-      top: -40%;
+  @keyframes flow {
+    from {
+      stroke-dashoffset: 2000;
     }
-    60%,
-    100% {
-      top: 100%;
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-10px);
     }
   }
 
@@ -572,45 +1164,11 @@ const [first, last] = [
     }
   }
 
-  @keyframes lit {
-    0% {
-      border-color: var(--g);
-      background: var(--g2);
-      color: var(--g);
-      transform: scale(1.08);
-    }
-    12% {
-      border-color: var(--line);
-      background: var(--card);
-      color: var(--ink);
-      transform: none;
-    }
-    100% {
-      border-color: var(--line);
-      background: var(--card);
-      color: var(--ink);
-    }
-  }
-
-  @keyframes ping {
-    0% {
-      opacity: 0.9;
-      transform: scale(1);
-    }
-    10% {
-      opacity: 0;
-      transform: scale(1.45);
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
   /*
    * Where the longest typed phrase would not fit beside the prefix, it gets a
    * line of its own, so typing never changes the line count (no layout shift).
    */
-  @media (max-width: 1100px) {
+  @media (max-width: 600px) {
     .sep {
       display: none;
     }
@@ -621,47 +1179,71 @@ const [first, last] = [
     }
   }
 
-  /* Two narrow columns: shrink the frame so the side skills stay on screen. */
-  @media (min-width: 861px) and (max-width: 1140px) {
-    .photo {
-      max-width: calc(100% - 120px);
-    }
-  }
-
-  @media (max-width: 860px) {
-    .grid {
-      grid-template-columns: minmax(0, 1fr);
+  @media (max-width: 820px) {
+    .svc {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
     }
 
-    .photo {
-      order: -1;
-      max-width: 300px;
-      margin-block: 40px;
+    .sbar {
+      flex-direction: column;
+      padding: 14px;
+    }
+
+    .stats {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .stats li {
+      flex: 1 1 40%;
+      padding: 6px;
+      border: 0;
+    }
+
+    .sbar .btn {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .chipf {
+      display: none;
+    }
+
+    .phone {
+      min-width: 64px;
     }
   }
 
   @media (max-width: 560px) {
-    /* Leave room for the skills around the frame inside a 360px screen. */
-    .photo {
-      max-width: min(300px, calc(100vw - 130px));
+    .hero :global(.bug) {
+      top: 2% !important;
+      left: 3% !important;
     }
 
-    .sk {
-      gap: 5px;
-      padding: 5px 9px;
-      font-size: 11.5px;
+    .utrust {
+      display: none;
     }
 
-    .sk :global(.i) {
-      width: 13px;
-      height: 13px;
+    .ubody {
+      padding-top: 0.6em;
+    }
+
+    .tagline {
+      gap: 10px;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+
+    .tagline .line {
+      width: 20px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .scan,
-    .sweep {
-      display: none;
+    .st {
+      stroke-dasharray: none;
+      opacity: 0.35;
     }
   }
 </style>

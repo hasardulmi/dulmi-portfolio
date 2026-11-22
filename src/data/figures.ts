@@ -1,12 +1,15 @@
 /**
- * Key figures for the About stats. Derived from the profile data so they can
+ * Key figures for the hero stats bar. Derived from the profile data so they can
  * never drift from the facts — never type these numbers in by hand.
  */
 import type { Profile } from "./profile";
 
 export interface Figure {
   value: number;
+  /** Full label, read by screen readers. */
   label: string;
+  /** Short label for the hero stats bar, split into two lines. */
+  short: [string, string];
 }
 
 /** Whole months from "YYYY-MM" start to end, counting both ends. */
@@ -27,15 +30,22 @@ export function keyFigures(profile: Profile): Figure[] {
     {
       value: monthsInclusive(internship.start, internship.end),
       label: `months as a ${internship.title.replace("Quality Assurance", "QA")} at ${internship.company}`,
+      short: ["months QA", "experience"],
     },
-    { value: platforms, label: "multi-role platforms tested end to end" },
+    {
+      value: platforms,
+      label: "multi-role platforms tested end to end",
+      short: ["platforms", "tested"],
+    },
     {
       value: roles,
       label: `user roles validated across ${platforms} platforms`,
+      short: ["user roles", `across ${platforms} platforms`],
     },
     {
       value: profile.articles.length,
       label: "technical articles published on Medium",
+      short: ["Medium", "articles"],
     },
   ];
 }

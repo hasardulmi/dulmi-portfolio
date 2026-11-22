@@ -23,7 +23,7 @@ test.describe("Home page smoke", () => {
       const body = getComputedStyle(document.body);
       return { bg: body.backgroundColor, font: body.fontFamily };
     });
-    expect(styles.bg).toBe("rgb(245, 248, 251)");
+    expect(styles.bg).toBe("rgb(243, 246, 248)");
     expect(styles.font).toContain("Inter Variable");
   });
 

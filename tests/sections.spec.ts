@@ -24,7 +24,9 @@ test.describe("Page structure and content rules", () => {
 
   test("one H1, and every section has a heading", async ({ page }) => {
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toHaveText("Hi, I'm Dulmi Hettiarachchi");
+    await expect(page.locator("h1")).toHaveText(
+      `${profile.hero.hello} ${profile.name}`,
+    );
     for (const id of sectionIds.filter((id) => id !== "top")) {
       await expect(section(page, id).locator("h2")).toHaveCount(1);
     }
@@ -150,31 +152,66 @@ test.describe("Hero", () => {
     }
   });
 
-  test("photo frame shows the photo if it exists, otherwise DH", async ({
+  test("every photo spot shows her photo if it exists, otherwise DH", async ({
     page,
   }) => {
     await page.goto("/");
-    const frame = page.locator("[data-photo]");
-    if (fs.existsSync("public/dulmi.jpg")) {
-      await expect(frame.locator("img")).toHaveAttribute("src", "/dulmi.jpg");
+    const spots = page.locator("[data-scene] [data-ph]");
+    await expect(spots).toHaveCount(2);
+    if (fs.existsSync("src/assets/dulmi.jpg")) {
+      for (const spot of await spots.all()) {
+        const img = spot.locator("img");
+        await expect(img).toHaveAttribute("src", /\.webp$/);
+        await expect(img).toHaveAttribute("alt", "");
+        await expect(img).toHaveAttribute("width", /\d+/);
+        await expect(img).toHaveAttribute("height", /\d+/);
+      }
+      // The large original is never published.
+      expect(fs.existsSync("public/dulmi.jpg")).toBe(false);
     } else {
-      await expect(frame.locator("img")).toHaveCount(0);
-      await expect(frame.locator(".face strong")).toHaveText("DH");
+      await expect(spots.locator("img")).toHaveCount(0);
+      await expect(spots.locator("b")).toHaveText(["DH", "DH"]);
     }
   });
 
-  test("the 9 skills sit around the photo, inside the screen", async ({
+  test("scene, service cards, stats bar and tagline", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const hero = section(page, "top");
+    await expect(hero.locator("[data-scene]")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+    await expect(hero.locator(".chipf")).toHaveText(profile.hero.chips);
+    await expect(hero.locator(".svc li")).toHaveText(
+      profile.hero.services.map((s) => s.label),
+    );
+    await expect(hero.locator(".tagline")).toHaveText(
+      profile.hero.tagline.join(" · "),
+    );
+    await expect(
+      hero.locator(".sbar").getByRole("link", { name: "Contact me" }),
+    ).toHaveAttribute("href", "#contact");
+    // The old radar photo frame is gone.
+    await expect(page.locator("[data-photo], .orbit, .sweep")).toHaveCount(0);
+  });
+
+  test("every readable hero element fits inside the screen", async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    const skills = page.locator("[data-photo] .sk");
-    await expect(skills).toHaveText(profile.hero.orbit.map((s) => s.label));
     const width = page.viewportSize()!.width;
-    for (const skill of await skills.all()) {
-      const box = (await skill.boundingBox())!;
-      expect(box.x).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width).toBeLessThanOrEqual(width);
-    }
+    const outside = await section(page, "top").evaluate((hero, w) => {
+      return [...hero.querySelectorAll<HTMLElement>("*")]
+        .filter((el) => !el.closest("[aria-hidden='true']"))
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && (r.left < -0.5 || r.right > w + 0.5);
+        })
+        .map((el) => el.className || el.tagName);
+    }, width);
+    expect(outside).toEqual([]);
   });
 
   test("typing never changes the height of the role line", async ({ page }) => {
@@ -225,7 +262,7 @@ test("no layout shift while the page animates", async ({ page }) => {
   expect(cls).toBeLessThan(0.05);
 });
 
-test.describe("About", () => {
+test.describe("Hero stats bar and About", () => {
   test("stats are derived from the data and count up to the right value", async ({
     page,
   }) => {
@@ -238,13 +275,22 @@ test.describe("About", () => {
     );
     expect(figures[2].label).toBe("user roles validated across 2 platforms");
 
+    expect(figures[2].short).toEqual(["user roles", "across 2 platforms"]);
+
     await page.goto("/");
-    const stats = page.locator("[data-stats] li");
+    const stats = page.locator("#top [data-stats] li");
+    await expect(stats).toHaveCount(4);
     await stats.last().scrollIntoViewIfNeeded();
     for (const [i, f] of figures.entries()) {
       await expect(stats.nth(i).locator("b")).toHaveText(String(f.value));
-      await expect(stats.nth(i).locator("span")).toHaveText(f.label);
+      await expect(stats.nth(i).locator("span[aria-hidden]")).toHaveText(
+        f.short.join(""),
+      );
+      await expect(stats.nth(i).locator(".sr-only")).toHaveText(f.label);
     }
+    // The stats live only in the hero now.
+    await expect(page.locator("[data-stats]")).toHaveCount(1);
+    await expect(section(page, "about").locator("[data-stats]")).toHaveCount(0);
   });
 
   test("story card and the 6 facts", async ({ page }) => {
@@ -475,6 +521,17 @@ test.describe("Reduced motion and no JavaScript", () => {
           els.filter((el) => getComputedStyle(el).opacity !== "1").length,
       );
     expect(hidden).toBe(0);
+    // The hero is complete: scene, cards, final stats and tagline.
+    const hero = section(page, "top");
+    await expect(hero.locator("[data-scene]")).toBeVisible();
+    await expect(hero.locator(".svc li")).toHaveCount(4);
+    await expect(hero.locator("[data-stats] b")).toHaveText([
+      "6",
+      "2",
+      "8",
+      "4",
+    ]);
+    await expect(hero.locator(".tagline")).toBeVisible();
     await expect(page.locator("[data-bug]").first()).toBeHidden();
     await expect(page.locator("[data-hunt]")).toBeHidden();
     await expect(page.getByRole("tablist")).toBeHidden();

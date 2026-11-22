@@ -1,10 +1,8 @@
 ---
 import { profile } from "../data/profile";
-import { keyFigures } from "../data/figures";
 import Icon from "./Icon.astro";
 
 const { about } = profile;
-const figures = keyFigures(profile);
 ---
 
 <section id="about" class="section" aria-labelledby="about-title">
@@ -51,17 +49,6 @@ const figures = keyFigures(profile);
         ))}
       </ul>
     </div>
-
-    <ul class="stats" data-stats>
-      {figures.map((f, i) => (
-        <li class="stat card rv" style={`--d:${i * 0.08}s`}>
-          <b class="tabular" data-count={f.value}>
-            {f.value}
-          </b>
-          <span>{f.label}</span>
-        </li>
-      ))}
-    </ul>
   </div>
 </section>
 
@@ -91,8 +78,7 @@ const figures = keyFigures(profile);
     margin-top: 18px;
   }
 
-  .facts,
-  .stats {
+  .facts {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -134,59 +120,9 @@ const figures = keyFigures(profile);
     background: var(--g2);
   }
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-    margin-top: 28px;
-  }
-
-  .stat {
-    position: relative;
-    overflow: hidden;
-    padding: 22px;
-    border-radius: 18px;
-  }
-
-  .stat::after {
-    content: "";
-    position: absolute;
-    right: -30px;
-    bottom: -30px;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: var(--g2);
-  }
-
-  .stat b {
-    position: relative;
-    z-index: 1;
-    display: block;
-    color: var(--g);
-    font: 800 42px / 1 var(--font-head-stack);
-  }
-
-  .stat span {
-    position: relative;
-    z-index: 1;
-    color: var(--mute);
-    font-size: 14px;
-  }
-
   @media (max-width: 1020px) {
     .about {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 560px) {
-    .stat b {
-      font-size: 34px;
     }
   }
 </style>

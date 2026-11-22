@@ -3,6 +3,7 @@
 /* Self-hosted variable fonts (latin subsets load on demand via unicode-range). */
 @import "@fontsource-variable/inter/wght.css";
 @import "@fontsource-variable/outfit/wght.css";
+@import "@fontsource/playfair-display/latin-500-italic.css";
 
 /*
  * Metric-matched local fallbacks so the swap to the web font causes
@@ -26,21 +27,37 @@
   line-gap-override: 0%;
 }
 
-/* ---------- Design tokens (CLAUDE.md §5) ---------- */
+@font-face {
+  font-family: "Playfair Fallback";
+  src: local("Georgia Italic"), local("Georgia-Italic");
+  font-style: italic;
+  size-adjust: 104%;
+  ascent-override: 104%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+/* ---------- Design tokens (CLAUDE.md §5, design-reference.html v6) ---------- */
 :root {
   color-scheme: light dark;
 
-  --bg: #f5f8fb;
+  --bg: #f3f6f8;
   --bg2: #ffffff;
-  --card: #ffffff;
-  --ink: #0f172a;
-  --mute: #4f5d74;
-  --line: #dde5ef;
-  /* Emerald, darkened from the reference #0b8547 so small text passes AA on --bg and --g2. */
-  --g: #087a40;
-  --g2: #e2f5eb;
+  --card: rgba(255, 255, 255, 0.85);
+  /* Opaque surface for popovers (menus, toast, dialog) that sit over content. */
+  --surface: #ffffff;
+  --ink: #0d1b2a;
+  --mute: #4b5b6e;
+  --line: #dbe3ea;
+  /* Emerald and gold darkened from the reference (#0a7f55, #9a6b2f) so small
+     text passes AA on --bg, --g2 and the emerald body glow. */
+  --g: #09714c;
+  --g2: #e0f3ea;
   --gtxt: #ffffff;
   --amber: #b45309;
+  --gold: #815a27;
+  --goldg: linear-gradient(100deg, #f3d9a4, #d6a35d 45%, #b07a3c);
+  --gcard: rgba(255, 255, 255, 0.75);
   --shadow: rgba(15, 23, 42, 0.28);
 
   --font-head-stack:
@@ -49,6 +66,7 @@
   --font-sans-stack:
     "Inter Variable", "Inter Fallback", system-ui, -apple-system, "Segoe UI",
     Arial, sans-serif;
+  --font-serif-stack: "Playfair Display", "Playfair Fallback", Georgia, serif;
 }
 
 /*
@@ -64,32 +82,38 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0a1120;
-    --bg2: #0f182b;
-    --card: #121d33;
-    --ink: #e6edf7;
-    --mute: #97a6bd;
-    --line: #22304d;
-    --g: #34d399;
-    --g2: #0f2e28;
-    --gtxt: #05261a;
+    --bg: #071423;
+    --bg2: #0a1a2d;
+    --card: rgba(255, 255, 255, 0.045);
+    --surface: #0c1d31;
+    --ink: #eef3f8;
+    --mute: #9fb0c3;
+    --line: rgba(255, 255, 255, 0.1);
+    --g: #2fd39a;
+    --g2: rgba(47, 211, 154, 0.12);
+    --gtxt: #04241a;
     --amber: #fbbf24;
+    --gold: #e2bd7f;
+    --gcard: rgba(255, 255, 255, 0.07);
     --shadow: rgba(0, 0, 0, 0.6);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0a1120;
-  --bg2: #0f182b;
-  --card: #121d33;
-  --ink: #e6edf7;
-  --mute: #97a6bd;
-  --line: #22304d;
-  --g: #34d399;
-  --g2: #0f2e28;
-  --gtxt: #05261a;
+  --bg: #071423;
+  --bg2: #0a1a2d;
+  --card: rgba(255, 255, 255, 0.045);
+  --surface: #0c1d31;
+  --ink: #eef3f8;
+  --mute: #9fb0c3;
+  --line: rgba(255, 255, 255, 0.1);
+  --g: #2fd39a;
+  --g2: rgba(47, 211, 154, 0.12);
+  --gtxt: #04241a;
   --amber: #fbbf24;
+  --gold: #e2bd7f;
+  --gcard: rgba(255, 255, 255, 0.07);
   --shadow: rgba(0, 0, 0, 0.6);
 }
 
@@ -114,6 +138,7 @@
   --color-line: var(--line);
   --color-g: var(--g);
   --color-g2: var(--g2);
+  --color-gold: var(--gold);
   --font-head: var(--font-head-stack);
   --font-sans: var(--font-sans-stack);
 }
@@ -130,7 +155,19 @@
 
   body {
     margin: 0;
-    background-color: var(--bg);
+    background:
+      radial-gradient(
+        1200px 600px at 80% -10%,
+        color-mix(in srgb, var(--g) 14%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 600px at -10% 30%,
+        color-mix(in srgb, var(--g) 8%, transparent),
+        transparent 60%
+      ),
+      var(--bg);
+    background-attachment: fixed;
     color: var(--ink);
     font: 16px/1.6 var(--font-sans-stack);
     overflow-x: clip;
@@ -187,7 +224,7 @@
   }
 
   .alt {
-    background: var(--bg2);
+    background: color-mix(in srgb, var(--bg2) 70%, transparent);
   }
 
   .head {
@@ -203,7 +240,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
-    color: var(--g);
+    color: var(--gold);
     font-size: 14px;
     font-weight: 600;
   }
@@ -213,11 +250,34 @@
     width: 22px;
     height: 2px;
     border-radius: 2px;
-    background: var(--g);
+    background: var(--gold);
   }
 
   .hl {
     color: var(--g);
+  }
+
+  /* Gold gradient words: dark theme only. In light theme the gradient is too
+     pale for AA, so solid --gold is used (as in the reference). */
+  h2 .hl,
+  .goldtext {
+    color: var(--gold);
+  }
+
+  :root[data-theme="dark"] :is(h2 .hl, .goldtext) {
+    background: var(--goldg);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) :is(h2 .hl, .goldtext) {
+      background: var(--goldg);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   }
 
   .sub {
@@ -237,9 +297,12 @@
     stroke-linejoin: round;
   }
 
-  .card {
+  .card,
+  .glass {
     background: var(--card);
     border: 1px solid var(--line);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
   .btn {
@@ -262,9 +325,21 @@
       box-shadow 0.2s;
   }
 
+  /* Fixed colours on purpose: the gradient and its text are the same in both
+     themes (#03241a on #13a874 is 5.5:1). */
   .btn.solid {
-    background: var(--g);
-    color: var(--gtxt);
+    border-color: transparent;
+    background: linear-gradient(135deg, #34d9a1, #13a874);
+    box-shadow: 0 10px 30px -12px rgba(47, 211, 154, 0.8);
+    color: #03241a;
+  }
+
+  .btn.glassbtn {
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
 
   .btn:hover {
