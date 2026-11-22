@@ -15,6 +15,23 @@ test.describe("Home page smoke", () => {
     expect(errors).toEqual([]);
   });
 
+  test("stylesheet is linked and applied", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator('link[rel="stylesheet"]')).not.toHaveCount(0);
+    const styles = await page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      return { bg: body.backgroundColor, font: body.fontFamily };
+    });
+    expect(styles.bg).toBe("rgb(255, 255, 255)");
+    expect(styles.font).toContain("Inter Variable");
+  });
+
+  test("ships no HTML comments", async ({ request }) => {
+    const html = await (await request.get("/")).text();
+    expect(html).not.toContain("<!--");
+  });
+
   test("has lang, title, description and a single H1", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -46,12 +63,22 @@ test.describe("Home page smoke", () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test("has no serious or critical axe violations", async ({ page }) => {
-    await page.goto("/");
-    const results = await new AxeBuilder({ page }).analyze();
-    const serious = results.violations.filter(
-      (v) => v.impact === "serious" || v.impact === "critical",
-    );
-    expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
-  });
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`has no serious or critical axe violations (${colorScheme})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.goto("/");
+
+      // Include the open mobile menu where it exists.
+      const menu = page.getByRole("button", { name: "Menu" });
+      if (await menu.isVisible()) await menu.click();
+
+      const results = await new AxeBuilder({ page }).analyze();
+      const serious = results.violations.filter(
+        (v) => v.impact === "serious" || v.impact === "critical",
+      );
+      expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
+    });
+  }
 });

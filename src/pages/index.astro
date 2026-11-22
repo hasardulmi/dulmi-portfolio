@@ -1,15 +1,44 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
 import { profile } from "../data/profile";
+import { sections } from "../data/site";
 
-// Placeholder page: sections are added one task at a time (CLAUDE.md §6, §8).
+// Placeholder page: sections are filled one task at a time (CLAUDE.md §6, §8).
 ---
 
 <BaseLayout
   title={`${profile.name} · Junior QA Engineer`}
   description="Junior QA Engineer in Sri Lanka: manual, functional and API testing, RBAC validation and Agile collaboration."
 >
+  <Nav />
   <main id="main" tabindex="-1">
-    <h1>{profile.name}</h1>
+    {/* TODO: Hero section (§6.2). */}
+    <div class="section">
+      <h1>{profile.name}</h1>
+    </div>
+
+    {sections.map((section) => (
+      <section
+        id={section.id}
+        class="section"
+        aria-labelledby={`${section.id}-title`}
+      >
+        {/* TODO: section content (§6). */}
+        <h2 id={`${section.id}-title`}>{section.title}</h2>
+      </section>
+    ))}
   </main>
 </BaseLayout>
+
+<style>
+  .section {
+    max-width: 1240px;
+    margin-inline: auto;
+    padding: clamp(36px, 5vw, 72px) max(5vw, 16px);
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>

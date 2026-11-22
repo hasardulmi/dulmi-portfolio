@@ -50,8 +50,19 @@
   --section-pad-x: max(5vw, 16px);
 }
 
+/*
+ * Theme: the inline script in BaseLayout sets data-theme="light" | "dark" on
+ * <html> before first paint (saved choice, else system setting). Without JS
+ * there is no data-theme and the system setting applies via the media query.
+ * Keep the two dark blocks below identical.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #10191e;
     --ink: #e9eef1;
     --mute: #9fb0bb;
@@ -60,6 +71,30 @@
     --rule: #26363f;
     --slate: #6fb3d2;
     --red: #ff5a4f;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #10191e;
+  --ink: #e9eef1;
+  --mute: #9fb0bb;
+  --panel: #18252c;
+  --panel-2: #142027;
+  --rule: #26363f;
+  --slate: #6fb3d2;
+  --red: #ff5a4f;
+}
+
+/* Tailwind `dark:` matches the same rules as the tokens above. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+      @slot;
+    }
   }
 }
 
@@ -87,12 +122,18 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* --header-h is measured by Nav.astro so anchors land below the sticky header. */
+    scroll-padding-top: calc(var(--header-h, 64px) + 16px);
   }
 
   body {
     margin: 0;
     background-color: var(--bg);
     color: var(--ink);
+    /* Theme switch fade; disabled by the reduced-motion reset below. */
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
     font-family: var(--font-sans-stack);
     font-size: 1rem;
     line-height: 1.6;

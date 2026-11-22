@@ -1,0 +1,263 @@
+---
+import { profile } from "../data/profile";
+import { navLinks } from "../data/site";
+import ThemeToggle from "./ThemeToggle.astro";
+// Menu icons: Lucide "menu" and "x" (ISC licence), inlined.
+---
+
+<header class="site-header" data-site-header>
+  <nav class="nav" aria-label="Main">
+    <a class="nav-name" href="#top">
+      {profile.name}
+    </a>
+
+    <div class="nav-actions">
+      {/*
+       * DOM order matters: the menu button comes before the links so that,
+       * on mobile, Tab moves from the button straight into the open menu.
+       */}
+      <button
+        type="button"
+        class="menu-button"
+        aria-expanded="false"
+        aria-controls="nav-links"
+        data-menu-button
+      >
+        <svg
+          class="icon icon-open"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg
+          class="icon icon-close"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+        <span class="sr-only">Menu</span>
+      </button>
+
+      <ul class="nav-links" id="nav-links" data-nav-links>
+        {navLinks.map((link) => (
+          <li>
+            <a href={link.href}>{link.label}</a>
+          </li>
+        ))}
+      </ul>
+
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>("[data-site-header]");
+  const button =
+    document.querySelector<HTMLButtonElement>("[data-menu-button]");
+  const links = document.querySelector<HTMLElement>("[data-nav-links]");
+  const desktop = window.matchMedia("(min-width: 600px)");
+
+  // Expose the header height so anchor targets clear the sticky header.
+  if (header) {
+    const setHeight = () =>
+      document.documentElement.style.setProperty(
+        "--header-h",
+        `${header.offsetHeight}px`,
+      );
+    new ResizeObserver(setHeight).observe(header);
+    setHeight();
+  }
+
+  const isOpen = () => button?.getAttribute("aria-expanded") === "true";
+
+  const setOpen = (open: boolean) => {
+    button?.setAttribute("aria-expanded", String(open));
+    links?.toggleAttribute("data-open", open);
+  };
+
+  button?.addEventListener("click", () => setOpen(!isOpen()));
+
+  // Close after choosing a link.
+  links?.addEventListener("click", (event) => {
+    if ((event.target as Element).closest("a")) setOpen(false);
+  });
+
+  // Escape closes and returns focus to the button.
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) {
+      setOpen(false);
+      button?.focus();
+    }
+  });
+
+  // Click outside the header closes.
+  document.addEventListener("click", (event) => {
+    if (isOpen() && header && !header.contains(event.target as Node)) {
+      setOpen(false);
+    }
+  });
+
+  // Growing past the breakpoint resets the menu.
+  desktop.addEventListener("change", () => setOpen(false));
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    transition: background-color 0.2s ease;
+  }
+
+  .nav {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding: 10px max(5vw, 16px);
+  }
+
+  .nav-name {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-serif-stack);
+    font-size: 1.1875rem; /* 19px */
+    font-weight: 650;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 6px;
+    border-radius: 8px;
+    color: var(--ink);
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .nav-links a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--slate);
+    text-decoration-thickness: 2px;
+  }
+
+  /* Icon-only (accessible name from visually hidden text), matches the theme toggle. */
+  .menu-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .menu-button:hover,
+  .menu-button[aria-expanded="true"] {
+    border-color: var(--ink);
+  }
+
+  .icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .icon-close,
+  .menu-button[aria-expanded="true"] .icon-open {
+    display: none;
+  }
+
+  .menu-button[aria-expanded="true"] .icon-close {
+    display: block;
+  }
+
+  /*
+   * Below 600px the links collapse behind the menu button — only with JS.
+   * Without JS the links stay visible and wrap, so they are always reachable.
+   */
+  @media (max-width: 599.98px) {
+    :global(.js) .menu-button {
+      display: inline-flex;
+    }
+
+    :global(.js) .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      padding: 8px max(5vw, 16px) 16px;
+      background-color: var(--bg);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    :global(.js) .nav-links[data-open] {
+      display: flex;
+    }
+
+    :global(.js) .nav-links a {
+      display: flex;
+      font-size: 1rem;
+    }
+  }
+
+  /*
+   * From 600px to ~660px the links wrap to a second row; the measured
+   * --header-h keeps anchor targets clear of the taller header.
+   */
+  @media (min-width: 600px) {
+    .nav-actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+
+  @media (min-width: 600px) and (max-width: 759.98px) {
+    .nav-name {
+      font-size: 1.0625rem; /* 17px */
+    }
+  }
+</style>

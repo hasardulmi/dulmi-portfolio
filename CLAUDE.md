@@ -69,7 +69,8 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 | `--slate` | `#2e6f8e` | `#6fb3d2` | "Passed" status, links, check marks |
 | `--red` | `#e3120b` | `#ff5a4f` | Single accent: "Open to QA roles" tag and focus rings only |
 
-- Dark mode follows the system setting (`prefers-color-scheme`). There is no theme toggle in v1.
+- **Theme:** the default follows the system setting (`prefers-color-scheme`). A sun/moon toggle button in the nav (desktop and mobile) switches light/dark and saves the choice in `localStorage` (`theme` key, wrapped in try/catch). A tiny inline script in `<head>` sets `data-theme="light" | "dark"` on `<html>` before first paint, so there is no flash of the wrong theme. Tokens and the Tailwind `dark:` variant respond to `data-theme`, and fall back to the system setting when JS is off (the toggle is then hidden). Until the visitor chooses, live system changes are followed.
+- Toggle accessibility: a real `<button>` with a fixed `aria-label="Dark theme"` and `aria-pressed` (true in dark). The colour fade on switch is disabled under `prefers-reduced-motion`.
 - All text must pass WCAG AA contrast (4.5:1 body, 3:1 large text). Check both themes.
 
 ### Typography
