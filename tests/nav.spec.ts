@@ -1,7 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import { navLinks, sections } from "../src/data/site";
 
-const isMobile = (page: Page) => (page.viewportSize()?.width ?? 0) < 600;
+/** Menu breakpoint: keep in sync with src/components/Nav.astro. */
+const MENU_BREAKPOINT = 660;
+const isMobile = (page: Page) =>
+  (page.viewportSize()?.width ?? 0) < MENU_BREAKPOINT;
 
 const mainNav = (page: Page) => page.getByRole("navigation", { name: "Main" });
 const menuButton = (page: Page) =>
@@ -88,7 +91,7 @@ test.describe("Nav", () => {
 
 test.describe("Nav · mobile menu", () => {
   test.beforeEach(async ({ page }) => {
-    test.skip(!isMobile(page), "Mobile menu only exists below 600px");
+    test.skip(!isMobile(page), "Mobile menu only exists below 660px");
     await page.goto("/");
   });
 
@@ -182,7 +185,7 @@ test.describe("Nav · mobile menu", () => {
 
 test.describe("Nav · desktop", () => {
   test("menu button is hidden and links are visible", async ({ page }) => {
-    test.skip(isMobile(page), "Desktop layout only from 600px");
+    test.skip(isMobile(page), "Desktop layout only from 660px");
     await page.goto("/");
     await expect(menuButton(page)).toBeHidden();
     for (const link of navLinks) {
@@ -190,5 +193,50 @@ test.describe("Nav · desktop", () => {
         mainNav(page).getByRole("link", { name: link.label }),
       ).toBeVisible();
     }
+  });
+});
+
+test.describe("Nav · breakpoint boundary", () => {
+  const headerHeight = async (page: Page) =>
+    (await page.locator("[data-site-header]").boundingBox())!.height;
+
+  test(`${MENU_BREAKPOINT - 1}px uses the menu button`, async ({ page }) => {
+    await page.setViewportSize({ width: MENU_BREAKPOINT - 1, height: 800 });
+    await page.goto("/");
+    await expect(menuButton(page)).toBeVisible();
+    await expect(
+      mainNav(page).getByRole("link", { name: navLinks[0].label }),
+    ).toBeHidden();
+    expect(await headerHeight(page)).toBeLessThanOrEqual(70);
+  });
+
+  test(`${MENU_BREAKPOINT}px shows all links on one row`, async ({ page }) => {
+    await page.setViewportSize({ width: MENU_BREAKPOINT, height: 800 });
+    await page.goto("/");
+    await expect(menuButton(page)).toBeHidden();
+    for (const link of navLinks) {
+      await expect(
+        mainNav(page).getByRole("link", { name: link.label }),
+      ).toBeVisible();
+    }
+    expect(await headerHeight(page)).toBeLessThanOrEqual(70);
+  });
+
+  test("resizing across the breakpoint closes an open menu", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/");
+    await menuButton(page).click();
+    await expect(menuButton(page)).toHaveAttribute("aria-expanded", "true");
+    await page.setViewportSize({ width: MENU_BREAKPOINT, height: 800 });
+    // The button is now hidden (out of the accessibility tree), so query it directly.
+    await expect(page.locator("[data-menu-button]")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    await expect(page.locator("[data-nav-links]")).not.toHaveAttribute(
+      "data-open",
+    );
   });
 });

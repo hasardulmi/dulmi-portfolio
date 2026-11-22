@@ -84,7 +84,7 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 - Mobile-first. Content max width 1240px. Section padding `clamp(36px, 5vw, 72px)` vertical, `max(5vw, 16px)` horizontal.
 - Section headers: 2px ink rule on top, serif H2, optional muted subtitle on the same baseline.
 - Radius: 8px buttons, 12–14px cards, 999px chips.
-- Breakpoints: stack to one column below 860px. Hide the nav links below 600px and show a simple accessible menu button.
+- Breakpoints: stack to one column below 860px. Hide the nav links below 660px and show a simple accessible menu button (660px is the narrowest width where name, links and theme toggle fit on one row, so the header is always a single row).
 
 ### Components
 - **Button:** min-height 44px; primary = ink background; secondary = 1.5px ink outline. Visible focus ring (3px `--red`, offset 2px).

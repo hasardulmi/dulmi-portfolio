@@ -64,7 +64,7 @@ import ThemeToggle from "./ThemeToggle.astro";
   const button =
     document.querySelector<HTMLButtonElement>("[data-menu-button]");
   const links = document.querySelector<HTMLElement>("[data-nav-links]");
-  const desktop = window.matchMedia("(min-width: 600px)");
+  const desktop = window.matchMedia("(min-width: 660px)");
 
   // Expose the header height so anchor targets clear the sticky header.
   if (header) {
@@ -214,10 +214,12 @@ import ThemeToggle from "./ThemeToggle.astro";
   }
 
   /*
-   * Below 600px the links collapse behind the menu button — only with JS.
+   * Below 660px the links collapse behind the menu button — only with JS.
+   * (660px is the narrowest width where name + links + toggle fit on one row.)
    * Without JS the links stay visible and wrap, so they are always reachable.
+   * Keep in sync with the matchMedia query above and tests/nav.spec.ts.
    */
-  @media (max-width: 599.98px) {
+  @media (max-width: 659.98px) {
     :global(.js) .menu-button {
       display: inline-flex;
     }
@@ -245,17 +247,17 @@ import ThemeToggle from "./ThemeToggle.astro";
   }
 
   /*
-   * From 600px to ~660px the links wrap to a second row; the measured
-   * --header-h keeps anchor targets clear of the taller header.
+   * Safety net only: if a font renders wider than expected, wrap rather than
+   * overflow. The measured --header-h keeps anchors clear of a taller header.
    */
-  @media (min-width: 600px) {
+  @media (min-width: 660px) {
     .nav-actions {
       flex-wrap: wrap;
       justify-content: flex-end;
     }
   }
 
-  @media (min-width: 600px) and (max-width: 759.98px) {
+  @media (min-width: 660px) and (max-width: 759.98px) {
     .nav-name {
       font-size: 1.0625rem; /* 17px */
     }
