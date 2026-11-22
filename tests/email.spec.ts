@@ -9,7 +9,7 @@ const triggers = (page: Page) => [
   {
     where: "hero",
     button: page.locator("#top").getByRole("button", {
-      name: "Email",
+      name: "Email Dulmi",
       exact: true,
     }),
   },
@@ -83,10 +83,21 @@ test.describe("Email menu", () => {
     });
   }
 
-  test("the email address is visible as text next to each trigger", async ({
+  test("hero shows 4 matching round icons; only the contact card shows the address", async ({
     page,
   }) => {
-    await expect(page.locator("#top .email")).toContainText(email);
+    const social = page.locator("#top .social");
+    await expect(social).not.toContainText(email);
+    const icons = social.locator("a");
+    await expect(icons).toHaveCount(4);
+    for (const icon of await icons.all()) {
+      const box = (await icon.boundingBox())!;
+      expect(Math.round(box.width)).toBe(44);
+      expect(Math.round(box.height)).toBe(44);
+      expect(
+        await icon.evaluate((el) => getComputedStyle(el).borderRadius),
+      ).toBe("50%");
+    }
     await expect(page.locator("#contact .email")).toContainText(email);
   });
 

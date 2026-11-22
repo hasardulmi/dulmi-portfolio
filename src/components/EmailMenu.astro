@@ -13,8 +13,8 @@ import Icon from "./Icon.astro";
 interface Props {
   /** Unique per instance, used for the menu id. */
   id: string;
-  /** "icon": round icon button with the address beside it (hero).
-   *  "card": contact card with icon, label and address (contact section). */
+  /** "icon": round icon button, same as the other hero social icons.
+   *  "card": contact card with icon, label and visible address (contact section). */
   variant: "icon" | "card";
 }
 
@@ -29,12 +29,11 @@ const menuId = `email-menu-${id}`;
       <a
         class="trigger"
         href={`mailto:${email}`}
-        aria-label="Email"
+        aria-label={`Email ${profile.shortName}`}
         data-email-trigger
       >
         <Icon name="mail" />
       </a>
-      <span class="addr">{email}</span>
     </>
   ) : (
     <a class="trigger" href={`mailto:${email}`} data-email-trigger>
@@ -249,7 +248,7 @@ const menuId = `email-menu-${id}`;
     gap: 10px;
   }
 
-  /* Hero: round icon button, address beside it */
+  /* Hero: round icon button, matching the other social icons */
   .as-icon .trigger {
     display: grid;
     flex: none;
@@ -273,12 +272,6 @@ const menuId = `email-menu-${id}`;
 
   .as-icon .trigger:hover {
     transform: translateY(-3px);
-  }
-
-  .addr {
-    color: var(--mute);
-    font-size: 15px;
-    overflow-wrap: anywhere;
   }
 
   /* Contact: full card */
