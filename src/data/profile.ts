@@ -72,18 +72,24 @@ export interface Language {
   level: string;
 }
 
-/** One row in the hero "Test run" panel — each is a verified skill from §9. */
-export interface TestCase {
-  id: string;
-  title: string;
+/** Hero "Profile at a glance" card. Key figures are derived from the data below. */
+export interface Glance {
+  strengths: string[];
+  tools: string[];
+  degree: {
+    /** Rendered as: level + <abbr title={full}>abbr</abbr>, institution. */
+    level: string;
+    abbr: string;
+    full: string;
+    institution: string;
+  };
 }
 
 export interface Hero {
   tag: string;
   roleLine: string;
   intro: string;
-  degreeLine: string;
-  testRun: TestCase[];
+  glance: Glance;
 }
 
 export interface Profile {
@@ -131,17 +137,22 @@ export const profile: Profile = {
     roleLine: "Junior QA Engineer · Manual, API & Agile testing",
     intro:
       "I test web applications manually and through their APIs. During six months as a QA intern at MobiOS, I designed and ran test cases for multi-role platforms, validated permissions for each user role, and tracked defects through the bug life cycle. I work with developers in Agile teams to reproduce issues and verify fixes.",
-    degreeLine:
-      "Final-year BSc (Hons) Management and Information Technology, University of Kelaniya",
-    testRun: [
-      { id: "TC-01", title: "Manual & functional testing" },
-      { id: "TC-02", title: "Test case design & execution" },
-      { id: "TC-03", title: "Regression testing" },
-      { id: "TC-04", title: "Defect reporting & bug life cycle" },
-      { id: "TC-05", title: "RBAC & permission validation" },
-      { id: "TC-06", title: "REST API testing with Postman" },
-      { id: "TC-07", title: "Agile team collaboration" },
-    ],
+    glance: {
+      strengths: [
+        "Test case design & execution",
+        "Regression testing before releases",
+        "RBAC & multi-role validation",
+        "REST API testing with Postman",
+      ],
+      // Tools from the CV skills list only.
+      tools: ["Postman", "Git", "GitHub", "Java"],
+      degree: {
+        level: "Final-year BSc (Hons)",
+        abbr: "MIT",
+        full: "Management and Information Technology",
+        institution: "University of Kelaniya",
+      },
+    },
   },
 
   cvUrl: "/Dulmi-Hettiarachchi-CV.pdf",

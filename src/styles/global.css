@@ -38,6 +38,7 @@
   --rule: #cfdbe1;
   --slate: #2e6f8e;
   --red: #e3120b;
+  --green: #1a6e35;
   /* Text on --slate fills (Passed badge). White fails on the light dark-theme slate. */
   --on-slate: #ffffff;
 
@@ -73,6 +74,7 @@
     --rule: #26363f;
     --slate: #6fb3d2;
     --red: #ff5a4f;
+    --green: #5cc98a;
     --on-slate: #10191e;
   }
 }
@@ -87,6 +89,7 @@
   --rule: #26363f;
   --slate: #6fb3d2;
   --red: #ff5a4f;
+  --green: #5cc98a;
   --on-slate: #10191e;
 }
 
@@ -112,6 +115,7 @@
   --color-rule: var(--rule);
   --color-slate: var(--slate);
   --color-red: var(--red);
+  --color-green: var(--green);
   --color-on-slate: var(--on-slate);
 
   --font-serif: var(--font-serif-stack);
@@ -243,6 +247,34 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  /* Tick list (§5): CSS check mark in --slate instead of bullets. */
+  .tick-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tick-list li {
+    position: relative;
+    padding-left: 1.6em;
+  }
+
+  .tick-list li + li {
+    margin-top: 6px;
+  }
+
+  .tick-list li::before {
+    content: "";
+    position: absolute;
+    left: 0.2em;
+    top: 0.42em;
+    width: 0.38em;
+    height: 0.7em;
+    border: solid var(--slate);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
   }
 
   /* Status badges (§5). Fixed width so Queued ↔ Passed never shifts layout. */

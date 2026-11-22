@@ -1,6 +1,6 @@
 ---
 import { profile } from "../data/profile";
-import TestRunPanel from "./TestRunPanel.astro";
+import GlanceCard from "./GlanceCard.astro";
 
 const { hero, contact } = profile;
 // Icon: Lucide "download" (ISC licence), inlined.
@@ -20,13 +20,7 @@ const { hero, contact } = profile;
 
       <p class="intro">{hero.intro}</p>
 
-      <p class="meta">
-        <span>{profile.location}</span>
-        <span class="sep" aria-hidden="true">
-          ·
-        </span>
-        <span>{hero.degreeLine}</span>
-      </p>
+      <p class="meta">{profile.location}</p>
 
       <div class="actions">
         <a class="btn btn-primary" href="#contact">
@@ -54,7 +48,7 @@ const { hero, contact } = profile;
     </div>
 
     <div class="hero-panel">
-      <TestRunPanel />
+      <GlanceCard />
     </div>
   </div>
 </section>
@@ -87,10 +81,10 @@ const { hero, contact } = profile;
     gap: 8px;
     margin: 0 0 20px;
     padding: 4px 12px;
-    border: 1.5px solid var(--red);
+    border: 1.5px solid var(--green);
     border-radius: 999px;
     background-color: var(--bg);
-    color: var(--ink);
+    color: var(--green);
     font-size: 0.875rem; /* 14px */
     font-weight: 600;
   }
@@ -99,7 +93,7 @@ const { hero, contact } = profile;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: var(--red);
+    background-color: var(--green);
   }
 
   h1 {
@@ -121,10 +115,6 @@ const { hero, contact } = profile;
     margin: 12px 0 0;
     color: var(--mute);
     font-size: 0.9375rem; /* 15px */
-  }
-
-  .sep {
-    margin-inline: 0.35em;
   }
 
   .actions {

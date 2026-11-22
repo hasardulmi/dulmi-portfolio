@@ -45,15 +45,17 @@ Do not add new dependencies without asking first and explaining why.
 
 **Idea: the site behaves like a clean test execution report.** Calm, precise and well organised, like a good test report: status badges, check marks, tidy tables and clear hierarchy. It is professional, not flashy.
 
-**One signature interactive element (and only one):** the **"Test run" hero panel**. On load, a short list of her verified skills appears as test cases (TC-01…TC-07) and each one switches from "Queued" to "Passed", filling a progress bar to 7/7.
-- Respect `prefers-reduced-motion`: show everything already "Passed", with no animation.
-- It must be real HTML text (readable by screen readers and search engines), not canvas or an image.
-- Total animation time under 2.5s. It must never block reading the page.
+**Hero card: "Profile at a glance".** A calm, static card next to the hero text (below it on mobile), built only from facts in `src/data/profile.ts`:
+- Three key figures in a row (big number, small label): **6 months** (QA Engineer Intern at MobiOS) · **2 platforms** (tested end to end) · **8 user roles** (validated across 2 platforms, RBAC). The figures are derived from the data in `src/data/figures.ts` (internship dates, number of projects, roles per project), never typed in by hand. 8 counts roles per platform (Super Admin is on both), so the label must say "across 2 platforms".
+- "Core strengths" tick list: Test case design & execution · Regression testing before releases · RBAC & multi-role validation · REST API testing with Postman.
+- Tools line (from the CV only): Postman, Git, GitHub, Java.
+- Last line: Final-year BSc (Hons) MIT, University of Kelaniya (MIT expanded with `<abbr>`).
+- Real HTML text, no animation, no JavaScript, no layout shift. Must stack at 360px and work in both themes.
 
 A possible v2 element (not now): an interactive RBAC permission matrix for the Coupon Management case study (roles × actions, click to see expected result).
 
 ### Do not use
-Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icons, ALL-CAPS tracked labels, "01/02/03" numbering, stock photos, parallax, 3D, cursor effects, auto-playing anything except the hero test run.
+Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icons, ALL-CAPS tracked labels, "01/02/03" numbering, stock photos, parallax, 3D, cursor effects, auto-playing anything.
 
 ## 5. Design tokens
 
@@ -67,7 +69,9 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 | `--panel-2` | `#f3f7f9` | `#142027` | Cards |
 | `--rule` | `#cfdbe1` | `#26363f` | Borders and dividers |
 | `--slate` | `#2e6f8e` | `#6fb3d2` | "Passed" status, links, check marks |
-| `--red` | `#e3120b` | `#ff5a4f` | Single accent: "Open to QA roles" tag and focus rings only |
+| `--on-slate` | `#ffffff` | `#10191e` | Text on `--slate` fills (white fails AA on the dark-theme slate) |
+| `--green` | `#1a6e35` | `#5cc98a` | "Open to QA roles" tag: text, outline and dot (AA on `--bg` and `--panel` in both themes) |
+| `--red` | `#e3120b` | `#ff5a4f` | Focus rings only |
 
 - **Theme:** the default follows the system setting (`prefers-color-scheme`). A sun/moon toggle button in the nav (desktop and mobile) switches light/dark and saves the choice in `localStorage` (`theme` key, wrapped in try/catch). A tiny inline script in `<head>` sets `data-theme="light" | "dark"` on `<html>` before first paint, so there is no flash of the wrong theme. Tokens and the Tailwind `dark:` variant respond to `data-theme`, and fall back to the system setting when JS is off (the toggle is then hidden). Until the visitor chooses, live system changes are followed.
 - Toggle accessibility: a real `<button>` with a fixed `aria-label="Dark theme"` and `aria-pressed` (true in dark). The colour fade on switch is disabled under `prefers-reduced-motion`.
@@ -89,14 +93,14 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 ### Components
 - **Button:** min-height 44px; primary = ink background; secondary = 1.5px ink outline. Visible focus ring (3px `--red`, offset 2px).
 - **Chip:** small pill for roles and skills.
-- **Status badge:** "Passed" (slate background, white text), "Queued" (panel background, muted text).
+- **Status badge:** "Passed" (slate background, `--on-slate` text), "Queued" (panel background, muted text).
 - **Tick list:** custom CSS check mark in `--slate` instead of bullets.
 - **Card:** `--panel-2` background, 1px `--rule` border, no coloured accent bars.
 
 ## 6. Page structure (in this order)
 
 1. **Nav** (sticky): name on the left; links to Experience, Projects, Skills, Writing, Contact.
-2. **Hero:** "Open to QA roles" tag · name (H1) · role line "Junior QA Engineer · Manual, API & Agile testing" · 2–3 sentence intro · location + degree line · buttons: Get in touch, Download CV (PDF), LinkedIn, GitHub · the Test-run panel on the right (below the text on mobile).
+2. **Hero:** "Open to QA roles" tag · name (H1) · role line "Junior QA Engineer · Manual, API & Agile testing" · 2–3 sentence intro · location line (the degree is on the card) · buttons: Get in touch, Download CV (PDF), LinkedIn, GitHub · the "Profile at a glance" card on the right (below the text on mobile).
 3. **Experience:** QA Engineer Intern at MobiOS, with dates and tick list.
 4. **Projects:**
    - **Featured case study: Coupon Management System.** Context → roles tested → risks (permissions, tenant data privacy, coupon misuse) → my test approach → what I did → skills used. Can grow into its own page `/projects/coupon-management`.
@@ -111,7 +115,7 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 ## 7. Quality bar (non-negotiable)
 
 - **Accessibility:** semantic HTML (`header`, `nav`, `main`, `section`, `footer`), one H1, logical heading order, skip-to-content link, alt text, labelled links ("LinkedIn profile", not "click here"), keyboard-navigable, visible focus, `lang="en"`.
-- **Motion:** only the hero test run and subtle hover states. Everything is off under `prefers-reduced-motion: reduce`.
+- **Motion:** only subtle hover states. Everything is off under `prefers-reduced-motion: reduce`.
 - **Performance:** no layout shift (CLS < 0.05), LCP < 2.0s on mobile, total JS under 15 KB, images in AVIF/WebP with width/height set.
 - **SEO:** unique `<title>` and meta description, Open Graph + Twitter card image (1200×630), canonical URL, `sitemap.xml`, `robots.txt`, JSON-LD `Person` schema (name, jobTitle, alumniOf, sameAs links).
 - **Links:** every external link opens correctly and uses `rel="noopener noreferrer"` when it has `target="_blank"`.
@@ -121,7 +125,7 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 
 - **One section per task.** Start every task in **plan mode**: show me the plan and the files you will touch, then wait for my OK.
 - After each section: run `npm run build`, `npx astro check` and the Playwright tests. Fix any failures before saying it's done.
-- **Commit after each completed section** with a clear message, e.g. `feat(hero): add test-run panel with reduced-motion fallback`.
+- **Commit after each completed section** with a clear message, e.g. `feat(experience): add MobiOS internship with tick list`.
 - Keep components small: `src/components/<Section>.astro`, data in `src/data/`, tokens in `src/styles/global.css`.
 - If anything in this brief conflicts with a request, ask me before choosing.
 

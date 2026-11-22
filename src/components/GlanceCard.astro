@@ -1,0 +1,154 @@
+---
+import { profile } from "../data/profile";
+import { glanceFigures } from "../data/figures";
+
+const { strengths, tools, degree } = profile.hero.glance;
+const figures = glanceFigures(profile);
+---
+
+{/* Static card: real HTML text, no script, no animation (CLAUDE.md §4). */}
+<div class="glance" role="group" aria-labelledby="glance-title">
+  <p class="glance-title" id="glance-title">
+    Profile at a glance
+  </p>
+
+  <dl class="figures">
+    {figures.map((f) => (
+      <div class="figure">
+        <dt class="figure-label">{f.label}</dt>
+        <dd class="figure-value">
+          <span class="figure-number tabular">{f.value}</span>
+          <span class="figure-unit">{f.unit}</span>
+        </dd>
+      </div>
+    ))}
+  </dl>
+
+  <p class="glance-heading" id="glance-strengths">
+    Core strengths
+  </p>
+  <ul class="tick-list strengths" aria-labelledby="glance-strengths">
+    {strengths.map((s) => (
+      <li>{s}</li>
+    ))}
+  </ul>
+
+  <p class="tools" data-tools>
+    <span class="tools-label">Tools:</span>{" "}
+    {tools.map((tool, i) => (
+      <>
+        {i > 0 && <span aria-hidden="true">{" · "}</span>}
+        <span>{tool}</span>
+      </>
+    ))}
+  </p>
+
+  <p class="degree" data-degree>
+    {degree.level} <abbr title={degree.full}>{degree.abbr}</abbr>,{" "}
+    {degree.institution}
+  </p>
+</div>
+
+<style>
+  .glance {
+    padding: 20px;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background-color: var(--bg);
+  }
+
+  @media (min-width: 480px) {
+    .glance {
+      padding: 24px 28px;
+    }
+  }
+
+  .glance-title,
+  .glance-heading {
+    margin: 0;
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 600;
+  }
+
+  /* Three key figures in a row at every width. */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 16px 0 22px;
+    padding: 16px 0;
+    border-block: 1px solid var(--rule);
+  }
+
+  .figure {
+    display: flex;
+    flex-direction: column-reverse; /* number on top; DOM order: label, value */
+    justify-content: flex-end;
+    gap: 4px;
+    padding-inline: 12px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .figure:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .figure:last-child {
+    padding-right: 0;
+  }
+
+  .figure-label {
+    color: var(--mute);
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.35;
+  }
+
+  .figure-value {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+
+  .figure-number {
+    font-family: var(--font-serif-stack);
+    font-size: clamp(30px, 3.4vw, 40px);
+    font-weight: 650;
+    line-height: 1;
+  }
+
+  .figure-unit {
+    margin-top: 4px;
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .strengths {
+    margin-top: 10px;
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.45;
+  }
+
+  .tools {
+    margin: 20px 0 0;
+    font-size: 0.875rem; /* 14px */
+  }
+
+  .tools-label {
+    font-weight: 600;
+  }
+
+  .degree {
+    margin: 16px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    color: var(--mute);
+    font-size: 0.875rem; /* 14px */
+  }
+
+  abbr {
+    text-decoration: underline dotted;
+    text-underline-offset: 0.18em;
+    cursor: help;
+  }
+</style>
