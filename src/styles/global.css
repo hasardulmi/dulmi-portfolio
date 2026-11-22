@@ -38,6 +38,8 @@
   --rule: #cfdbe1;
   --slate: #2e6f8e;
   --red: #e3120b;
+  /* Text on --slate fills (Passed badge). White fails on the light dark-theme slate. */
+  --on-slate: #ffffff;
 
   --font-serif-stack:
     "Source Serif 4 Variable", "Source Serif 4 Fallback", Georgia, serif;
@@ -71,6 +73,7 @@
     --rule: #26363f;
     --slate: #6fb3d2;
     --red: #ff5a4f;
+    --on-slate: #10191e;
   }
 }
 
@@ -84,6 +87,7 @@
   --rule: #26363f;
   --slate: #6fb3d2;
   --red: #ff5a4f;
+  --on-slate: #10191e;
 }
 
 /* Tailwind `dark:` matches the same rules as the tokens above. */
@@ -108,6 +112,7 @@
   --color-rule: var(--rule);
   --color-slate: var(--slate);
   --color-red: var(--red);
+  --color-on-slate: var(--on-slate);
 
   --font-serif: var(--font-serif-stack);
   --font-sans: var(--font-sans-stack);
@@ -189,6 +194,80 @@
 @layer components {
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Buttons (§5): 44px min height, 8px radius. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1.5px solid var(--ink);
+    border-radius: 8px;
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .btn-primary {
+    background-color: var(--ink);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover {
+    background-color: transparent;
+    color: var(--ink);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--ink);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--ink);
+    color: var(--bg);
+  }
+
+  .btn svg {
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Status badges (§5). Fixed width so Queued ↔ Passed never shifts layout. */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 5.75rem;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.8125rem; /* 13px */
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .badge-passed {
+    background-color: var(--slate);
+    color: var(--on-slate);
+  }
+
+  .badge-queued {
+    background-color: var(--panel);
+    color: var(--mute);
   }
 
   .skip-link {

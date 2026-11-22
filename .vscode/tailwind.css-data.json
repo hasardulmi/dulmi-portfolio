@@ -1,0 +1,33 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@theme",
+      "description": "Tailwind CSS v4: define design tokens that generate utility classes."
+    },
+    {
+      "name": "@custom-variant",
+      "description": "Tailwind CSS v4: define a custom variant (used here for `dark:` tied to data-theme)."
+    },
+    {
+      "name": "@slot",
+      "description": "Tailwind CSS v4: where the styled rule goes inside @custom-variant."
+    },
+    {
+      "name": "@utility",
+      "description": "Tailwind CSS v4: define a custom utility class."
+    },
+    {
+      "name": "@variant",
+      "description": "Tailwind CSS v4: apply a Tailwind variant inside CSS."
+    },
+    {
+      "name": "@apply",
+      "description": "Tailwind CSS: inline existing utility classes into custom CSS."
+    },
+    {
+      "name": "@source",
+      "description": "Tailwind CSS v4: add source files for class detection."
+    }
+  ]
+}

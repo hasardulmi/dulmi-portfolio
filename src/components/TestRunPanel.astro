@@ -1,0 +1,235 @@
+---
+import { profile } from "../data/profile";
+
+const cases = profile.hero.testRun;
+const total = cases.length;
+// Icons: Lucide "check" and "clock" (ISC licence), inlined.
+---
+
+{/*
+ * The HTML ships in its final state (all Passed, n/n) so it reads correctly
+ * without JS, with reduced motion, and for search engines. The inline script
+ * below resets it to Queued before first paint and replays the run.
+ */}
+<div
+  class="run"
+  id="test-run"
+  role="group"
+  aria-labelledby="test-run-title"
+  data-test-run
+>
+  <div class="run-head">
+    <p class="run-title" id="test-run-title">
+      Test run: QA skills
+    </p>
+    <p class="run-count tabular" data-run-summary>
+      <span data-count>{total}</span>/{total} passed
+    </p>
+  </div>
+
+  <div class="run-bar" aria-hidden="true">
+    <div class="run-bar-fill" data-bar></div>
+  </div>
+
+  <ol class="run-list">
+    {cases.map((tc) => (
+      <li class="run-row" data-tc data-state="passed">
+        <span class="run-id tabular">{tc.id}</span>
+        <span class="run-name">{tc.title}</span>
+        <span class="badge badge-passed" data-badge>
+          <svg
+            class="i-passed"
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          <svg
+            class="i-queued"
+            viewBox="0 0 24 24"
+            width="12"
+            height="12"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+          <span data-label>Passed</span>
+        </span>
+      </li>
+    ))}
+  </ol>
+</div>
+
+{/*
+ * Inline (not a bundled module) so it runs synchronously right after the
+ * markup, before first paint: no Passed → Queued flash. ~0.6 KB.
+ * Timing: 300 ms delay + 7 × 240 ms steps ≈ 2.0 s total (budget: 2.5 s).
+ */}
+<script is:inline>
+  (function () {
+    const run = document.getElementById("test-run");
+    if (!run) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const rows = run.querySelectorAll("[data-tc]");
+    const count = run.querySelector("[data-count]");
+    const bar = run.querySelector("[data-bar]");
+    const total = rows.length;
+
+    function setRow(row, passed) {
+      const badge = row.querySelector("[data-badge]");
+      row.setAttribute("data-state", passed ? "passed" : "queued");
+      badge.classList.toggle("badge-passed", passed);
+      badge.classList.toggle("badge-queued", !passed);
+      badge.querySelector("[data-label]").textContent = passed
+        ? "Passed"
+        : "Queued";
+    }
+
+    function setProgress(done) {
+      count.textContent = String(done);
+      bar.style.transform = "scaleX(" + done / total + ")";
+    }
+
+    rows.forEach(function (row) {
+      setRow(row, false);
+    });
+    setProgress(0);
+    run.setAttribute("data-running", "");
+
+    rows.forEach(function (row, i) {
+      setTimeout(
+        function () {
+          run.setAttribute("data-animate", "");
+          setRow(row, true);
+          setProgress(i + 1);
+          if (i === total - 1) {
+            setTimeout(function () {
+              run.removeAttribute("data-running");
+            }, 250);
+          }
+        },
+        300 + 240 * i,
+      );
+    });
+  })();
+</script>
+
+<style>
+  .run {
+    padding: 18px 20px 8px;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background-color: var(--bg);
+  }
+
+  .run-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
+  .run-title,
+  .run-count {
+    margin: 0;
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .run-title {
+    font-weight: 600;
+  }
+
+  .run-count {
+    color: var(--mute);
+  }
+
+  .run-bar {
+    height: 6px;
+    margin: 12px 0 6px;
+    border-radius: 999px;
+    background-color: var(--panel);
+    overflow: hidden;
+  }
+
+  .run-bar-fill {
+    height: 100%;
+    background-color: var(--slate);
+    transform-origin: left center;
+  }
+
+  .run[data-animate] .run-bar-fill {
+    transition: transform 0.2s ease-out;
+  }
+
+  .run-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .run-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .run-row:first-child {
+    border-top: 0;
+  }
+
+  .run-id {
+    color: var(--mute);
+    font-size: 0.8125rem; /* 13px */
+    font-weight: 500;
+  }
+
+  .run-name {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.35;
+  }
+
+  .badge svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .badge .i-queued {
+    stroke-width: 2.5;
+  }
+
+  .run-row[data-state="passed"] .i-queued,
+  .run-row[data-state="queued"] .i-passed {
+    display: none;
+  }
+
+  /*
+   * The flip itself: a small scale "pop". Colours stay at full strength
+   * throughout (no opacity fade), so contrast never dips mid-animation.
+   */
+  .run[data-running] .run-row[data-state="passed"] .badge {
+    animation: badge-pass 0.2s ease-out;
+  }
+
+  @keyframes badge-pass {
+    from {
+      transform: scale(0.88);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+</style>

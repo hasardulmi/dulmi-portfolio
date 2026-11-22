@@ -103,7 +103,7 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
    - **Marketplace Platform** (standard card).
    - **Public QA projects** (empty slot for now; add when built, e.g. a Postman + Newman API test suite).
 5. **Skills:** 4 groups (Testing, Process, API & security, Programming & tools) as chips.
-6. **Writing:** the 4 Medium articles, each linking to its article. `TODO:` until I give the real article URLs; link to the Medium profile meanwhile.
+6. **Writing:** the 4 Medium articles, each linking to its article (URLs in Section 9).
 7. **Education & certifications** (two columns on desktop), plus a short Activities list.
 8. **Research** (`TODO:` — "Dark patterns" research; add only after I give the details. Do not create placeholder text for it.)
 9. **Contact / footer:** short invitation line, email, LinkedIn, GitHub, Medium, copyright.
@@ -131,9 +131,9 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 **Headline:** Junior QA Engineer | Manual Testing | API Testing | Agile
 **Location:** Gampaha, Sri Lanka
 **Email:** hasardulmi@gmail.com
-**LinkedIn:** https://linkedin.com/in/dulmi-hasarangi
+**LinkedIn:** https://www.linkedin.com/in/dulmi-hasarangi-21333b280 (display text: linkedin.com/in/dulmi-hasarangi)
 **GitHub:** https://github.com/hasardulmi
-**Medium:** https://medium.com/@dulmi-hasarangi
+**Medium:** https://medium.com/@hasardulmi
 
 **Summary:** QA Engineer with 6 months of hands-on experience in manual and functional testing of web-based applications; final-year BSc (Hons) Management and Information Technology undergraduate, University of Kelaniya. Skilled in test case design, regression testing, defect tracking, RBAC validation and REST API testing with Postman. Strong understanding of STLC, bug life cycle and Agile collaboration, with a Java (OOP) foundation.
 
@@ -170,13 +170,15 @@ Purple gradients, glassmorphism, neon on black, cream + serif + rust, emoji icon
 **Certifications:** API Testing (GET/POST/PUT/DELETE; intro to performance and security testing) · Object-Oriented Programming in Java.
 
 **Medium articles**
-1. A Beginner's Guide to Black Box, White Box, and Experience-Based Testing
-2. Foundations of Software Testing — STLC, test cases, bug reporting, functional and non-functional testing
-3. Understanding JWT (JSON Web Token) — secure authentication and authorization in web applications
-4. Docker for Beginners — containers, images and Dockerfiles for consistent deployment
+1. A Beginner's Guide to Black Box, White Box, and Experience-Based Testing — https://medium.com/@hasardulmi/a-beginners-guide-to-black-box-white-box-and-experience-based-testing-9af436506600
+2. Foundations of Software Testing — STLC, test cases, bug reporting, functional and non-functional testing — https://medium.com/@hasardulmi/foundations-of-software-testing-8b6a873fb53d
+3. Understanding JWT (JSON Web Token) — secure authentication and authorization in web applications — https://medium.com/@hasardulmi/understanding-jwt-json-web-token-86f7b886b57f
+4. Docker for Beginners — containers, images and Dockerfiles for consistent deployment — https://medium.com/@hasardulmi/docker-for-beginners-9152ef6c6adc
 
 **Activities:** Organizing Committee — HackX 9.0, hackxJR (Dept. of Industrial Management), Exposition Issue 20 (University of Kelaniya) · Member — LEO Club and LED Club, University of Kelaniya.
 
 **Languages:** Sinhala (native), English (professional working proficiency).
 
-**Pending from Dulmi (leave as TODO):** Medium article URLs · CV PDF file (`public/Dulmi-Hettiarachchi-CV.pdf`) · GitHub repos to feature · public QA project(s) · Dark patterns research details · photo (optional) · custom domain.
+**CV PDF:** `public/Dulmi-Hettiarachchi-CV.pdf`
+
+**Pending from Dulmi (leave as TODO):** GitHub repos to feature · public QA project(s) · Dark patterns research details · photo (optional) · custom domain.

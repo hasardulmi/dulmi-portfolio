@@ -13,6 +13,8 @@ export interface Link {
 export interface Contact {
   email: string;
   linkedin: string;
+  /** Short display form of the LinkedIn URL. */
+  linkedinDisplay: string;
   github: string;
   medium: string;
 }
@@ -57,8 +59,7 @@ export interface Certification {
 export interface Article {
   title: string;
   summary?: string;
-  /** TODO: real Medium article URL — null until Dulmi provides it. */
-  url: string | null;
+  url: string;
 }
 
 export interface Activity {
@@ -71,14 +72,28 @@ export interface Language {
   level: string;
 }
 
+/** One row in the hero "Test run" panel — each is a verified skill from §9. */
+export interface TestCase {
+  id: string;
+  title: string;
+}
+
+export interface Hero {
+  tag: string;
+  roleLine: string;
+  intro: string;
+  degreeLine: string;
+  testRun: TestCase[];
+}
+
 export interface Profile {
   name: string;
   headline: string;
   location: string;
   contact: Contact;
   summary: string;
-  /** TODO: CV PDF not yet provided (public/Dulmi-Hettiarachchi-CV.pdf). */
-  cvUrl: string | null;
+  hero: Hero;
+  cvUrl: string;
   /** TODO: optional photo not yet provided. */
   photo: null;
   experience: Experience[];
@@ -102,16 +117,34 @@ export const profile: Profile = {
 
   contact: {
     email: "hasardulmi@gmail.com",
-    linkedin: "https://linkedin.com/in/dulmi-hasarangi",
+    linkedin: "https://www.linkedin.com/in/dulmi-hasarangi-21333b280",
+    linkedinDisplay: "linkedin.com/in/dulmi-hasarangi",
     github: "https://github.com/hasardulmi",
-    medium: "https://medium.com/@dulmi-hasarangi",
+    medium: "https://medium.com/@hasardulmi",
   },
 
   summary:
     "QA Engineer with 6 months of hands-on experience in manual and functional testing of web-based applications; final-year BSc (Hons) Management and Information Technology undergraduate, University of Kelaniya. Skilled in test case design, regression testing, defect tracking, RBAC validation and REST API testing with Postman. Strong understanding of STLC, bug life cycle and Agile collaboration, with a Java (OOP) foundation.",
 
-  // TODO: add "/Dulmi-Hettiarachchi-CV.pdf" once the file is in public/.
-  cvUrl: null,
+  hero: {
+    tag: "Open to QA roles",
+    roleLine: "Junior QA Engineer · Manual, API & Agile testing",
+    intro:
+      "I test web applications manually and through their APIs. During six months as a QA intern at MobiOS, I designed and ran test cases for multi-role platforms, validated permissions for each user role, and tracked defects through the bug life cycle. I work with developers in Agile teams to reproduce issues and verify fixes.",
+    degreeLine:
+      "Final-year BSc (Hons) Management and Information Technology, University of Kelaniya",
+    testRun: [
+      { id: "TC-01", title: "Manual & functional testing" },
+      { id: "TC-02", title: "Test case design & execution" },
+      { id: "TC-03", title: "Regression testing" },
+      { id: "TC-04", title: "Defect reporting & bug life cycle" },
+      { id: "TC-05", title: "RBAC & permission validation" },
+      { id: "TC-06", title: "REST API testing with Postman" },
+      { id: "TC-07", title: "Agile team collaboration" },
+    ],
+  },
+
+  cvUrl: "/Dulmi-Hettiarachchi-CV.pdf",
 
   // TODO: photo (optional) — pending from Dulmi.
   photo: null,
@@ -236,28 +269,27 @@ export const profile: Profile = {
     { name: "Object-Oriented Programming in Java" },
   ],
 
-  // TODO: real Medium article URLs — link to the Medium profile until provided.
   articles: [
     {
       title:
         "A Beginner's Guide to Black Box, White Box, and Experience-Based Testing",
-      url: null,
+      url: "https://medium.com/@hasardulmi/a-beginners-guide-to-black-box-white-box-and-experience-based-testing-9af436506600",
     },
     {
       title: "Foundations of Software Testing",
       summary:
         "STLC, test cases, bug reporting, functional and non-functional testing.",
-      url: null,
+      url: "https://medium.com/@hasardulmi/foundations-of-software-testing-8b6a873fb53d",
     },
     {
       title: "Understanding JWT (JSON Web Token)",
       summary: "Secure authentication and authorization in web applications.",
-      url: null,
+      url: "https://medium.com/@hasardulmi/understanding-jwt-json-web-token-86f7b886b57f",
     },
     {
       title: "Docker for Beginners",
       summary: "Containers, images and Dockerfiles for consistent deployment.",
-      url: null,
+      url: "https://medium.com/@hasardulmi/docker-for-beginners-9152ef6c6adc",
     },
   ],
 
