@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+/* Self-hosted variable fonts (latin subsets load on demand via unicode-range). */
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/source-serif-4/wght.css";
+
+/*
+ * Metric-matched local fallbacks so the swap to the web font causes
+ * no visible layout shift. Values are approximate overrides on system fonts.
+ */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90.5%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Source Serif 4 Fallback";
+  src: local("Georgia");
+  size-adjust: 98.5%;
+  ascent-override: 93%;
+  descent-override: 34%;
+  line-gap-override: 0%;
+}
+
+/* ---------- Design tokens (CLAUDE.md §5) ---------- */
+:root {
+  color-scheme: light dark;
+
+  --bg: #ffffff;
+  --ink: #121212;
+  --mute: #56616b;
+  --panel: #e3ecf0;
+  --panel-2: #f3f7f9;
+  --rule: #cfdbe1;
+  --slate: #2e6f8e;
+  --red: #e3120b;
+
+  --font-serif-stack:
+    "Source Serif 4 Variable", "Source Serif 4 Fallback", Georgia, serif;
+  --font-sans-stack:
+    "Inter Variable", "Inter Fallback", system-ui, -apple-system, "Segoe UI",
+    Arial, sans-serif;
+
+  --content-max: 1240px;
+  --section-pad-y: clamp(36px, 5vw, 72px);
+  --section-pad-x: max(5vw, 16px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10191e;
+    --ink: #e9eef1;
+    --mute: #9fb0bb;
+    --panel: #18252c;
+    --panel-2: #142027;
+    --rule: #26363f;
+    --slate: #6fb3d2;
+    --red: #ff5a4f;
+  }
+}
+
+/* Expose tokens as Tailwind utilities: bg-bg, text-ink, border-rule, font-serif, … */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-rule: var(--rule);
+  --color-slate: var(--slate);
+  --color-red: var(--red);
+
+  --font-serif: var(--font-serif-stack);
+  --font-sans: var(--font-sans-stack);
+
+  --radius-btn: 8px;
+  --radius-card: 12px;
+  --radius-chip: 999px;
+}
+
+/* ---------- Base styles ---------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans-stack);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+
+  @media (min-width: 860px) {
+    body {
+      font-size: 1.0625rem; /* 17px */
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif-stack);
+    font-weight: 650;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: clamp(40px, 5.4vw, 60px);
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  h2 {
+    font-size: clamp(28px, 3.4vw, 38px);
+  }
+
+  h3 {
+    font-size: 21px;
+    line-height: 1.15;
+  }
+
+  p {
+    max-width: 70ch;
+  }
+
+  a {
+    color: var(--slate);
+    text-underline-offset: 0.18em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Helpers ---------- */
+@layer components {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    padding: 10px 16px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 8px;
+    background-color: var(--ink);
+    color: var(--bg);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

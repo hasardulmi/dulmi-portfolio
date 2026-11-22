@@ -1,16 +1,15 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { profile } from "../data/profile";
+
+// Placeholder page: sections are added one task at a time (CLAUDE.md §6, §8).
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title={`${profile.name} · Junior QA Engineer`}
+  description="Junior QA Engineer in Sri Lanka: manual, functional and API testing, RBAC validation and Agile collaboration."
+>
+  <main id="main" tabindex="-1">
+    <h1>{profile.name}</h1>
+  </main>
+</BaseLayout>
