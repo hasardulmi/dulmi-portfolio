@@ -1,0 +1,68 @@
+---
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+
+// Decorative: the same skills are listed in full in the Skills section.
+// The list is rendered twice so the loop is seamless.
+---
+
+<div class="marq" aria-hidden="true">
+  <div class="track">
+    {[0, 1].map(() =>
+      profile.marquee.map((t) => (
+        <span>
+          <Icon name="check" />
+          {t}
+        </span>
+      )),
+    )}
+  </div>
+</div>
+
+<style>
+  .marq {
+    overflow: hidden;
+    padding: 16px 0;
+    border-block: 1px solid var(--line);
+    background: var(--bg2);
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+  }
+
+  .track {
+    display: flex;
+    gap: 44px;
+    width: max-content;
+    animation: marq 38s linear infinite;
+  }
+
+  .marq:hover .track {
+    animation-play-state: paused;
+  }
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--mute);
+    font: 600 18px var(--font-head-stack);
+    white-space: nowrap;
+  }
+
+  span :global(.i) {
+    width: 18px;
+    height: 18px;
+    color: var(--g);
+  }
+
+  @keyframes marq {
+    to {
+      transform: translateX(calc(-50% - 22px));
+    }
+  }
+</style>

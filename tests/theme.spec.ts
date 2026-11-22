@@ -6,8 +6,8 @@ const theme = (page: Page) =>
 const background = (page: Page) =>
   page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
-const LIGHT_BG = "rgb(255, 255, 255)";
-const DARK_BG = "rgb(16, 25, 30)";
+const LIGHT_BG = "rgb(245, 248, 251)";
+const DARK_BG = "rgb(10, 17, 32)";
 
 test.describe("Theme toggle", () => {
   test("defaults to a light system setting", async ({ page }) => {

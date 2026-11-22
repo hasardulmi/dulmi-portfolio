@@ -1,0 +1,264 @@
+---
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+
+// The 5 bug buttons live in their sections (BugButton.astro). This component
+// is the counter, the toast and the finish dialog. JS only: hidden without it.
+const total = Object.keys(profile.bugs).length;
+---
+
+<div class="hunt js-only" data-hunt>
+  <span class="ic">
+    <Icon name="bug" />
+  </span>
+  Bugs found
+  <b class="tabular" data-count-found>
+    0/{total}
+  </b>
+</div>
+<div class="toast" role="status" data-toast></div>
+
+<dialog class="done" aria-labelledby="done-title" data-done>
+  <div class="big">
+    <Icon name="check" />
+  </div>
+  <h2 id="done-title">All {total} bugs found!</h2>
+  <p>
+    You just did a little QA. Finding issues before users do is what I do every
+    day. Let's talk about how I can help your team.
+  </p>
+  <div class="row">
+    <a class="btn solid" href="#contact" data-done-close>
+      Contact me
+    </a>
+    <button type="button" class="btn" data-done-close>
+      Keep browsing
+    </button>
+  </div>
+</dialog>
+
+<script>
+  import { reduceMotion } from "../scripts/motion";
+
+  const bugs = [...document.querySelectorAll<HTMLButtonElement>("[data-bug]")];
+  const found = document.querySelector<HTMLElement>("[data-count-found]")!;
+  const toast = document.querySelector<HTMLElement>("[data-toast]")!;
+  const done = document.querySelector<HTMLDialogElement>("[data-done]")!;
+  let count = 0;
+  let toastTimer: number | undefined;
+
+  const say = (title: string, message: string) => {
+    toast.replaceChildren();
+    const b = document.createElement("b");
+    b.textContent = title;
+    const span = document.createElement("span");
+    span.textContent = message;
+    toast.append(b, span);
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("show"), 3800);
+  };
+
+  const confetti = () => {
+    if (reduceMotion()) return;
+    const colours = ["var(--g)", "var(--amber)", "#60a5fa", "#f472b6"];
+    for (let i = 0; i < 70; i++) {
+      const c = document.createElement("i");
+      c.className = "conf";
+      c.setAttribute("aria-hidden", "true");
+      c.style.left = `${Math.random() * 96}vw`;
+      c.style.background = colours[i % colours.length];
+      c.style.animationDelay = `${Math.random() * 0.8}s`;
+      // Inside the dialog: a modal sits in the top layer, above any z-index.
+      done.append(c);
+      setTimeout(() => c.remove(), 3400);
+    }
+  };
+
+  bugs.forEach((bug) =>
+    bug.addEventListener("click", () => {
+      if (bug.hasAttribute("data-found")) return;
+      count += 1;
+      bug.setAttribute("data-found", "");
+      found.textContent = `${count}/${bugs.length}`;
+      say(`Bug #${count} squashed`, bug.dataset.msg ?? "");
+      if (count === bugs.length) {
+        setTimeout(
+          () => {
+            done.showModal();
+            confetti();
+          },
+          reduceMotion() ? 0 : 700,
+        );
+      }
+    }),
+  );
+
+  done
+    .querySelectorAll("[data-done-close]")
+    .forEach((el) => el.addEventListener("click", () => done.close()));
+
+  // Clicking the backdrop (outside the box) closes too. Esc is native.
+  done.addEventListener("click", (e) => {
+    if (e.target === done) done.close();
+  });
+</script>
+
+<style>
+  .hunt {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    z-index: 40;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: 0 18px 40px -20px var(--shadow);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  :global(.js) .hunt {
+    display: flex;
+  }
+
+  .hunt .ic {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--amber) 16%, transparent);
+    color: var(--amber);
+  }
+
+  .hunt :global(.i) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .hunt b {
+    color: var(--g);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 72px;
+    left: 16px;
+    z-index: 41;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--g);
+    border-radius: 14px;
+    background: var(--card);
+    box-shadow: 0 20px 44px -22px var(--shadow);
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+    pointer-events: none;
+  }
+
+  .toast:global(.show) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .toast :global(b) {
+    display: block;
+    margin-bottom: 4px;
+    font: 600 15px var(--font-head-stack);
+  }
+
+  .toast :global(span) {
+    color: var(--mute);
+  }
+
+  .done {
+    max-width: min(440px, calc(100vw - 32px));
+    padding: 34px;
+    border: 1px solid var(--g);
+    border-radius: 24px;
+    background: var(--card);
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .done[open] {
+    animation: appear 0.4s ease;
+  }
+
+  .done::backdrop {
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  .done h2 {
+    margin: 12px 0 8px;
+    font-size: 26px;
+  }
+
+  .done p {
+    color: var(--mute);
+  }
+
+  .big {
+    display: grid;
+    place-items: center;
+    width: 70px;
+    height: 70px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: var(--g);
+    color: var(--gtxt);
+  }
+
+  .big :global(.i) {
+    width: 34px;
+    height: 34px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  :global(.conf) {
+    position: fixed;
+    top: -12px;
+    z-index: 2147483647;
+    width: 9px;
+    height: 14px;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: fall 2.4s ease-in forwards;
+  }
+
+  /* Opacity only: a transform would trap the fixed-position confetti inside the box. */
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(105vh) rotate(720deg);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .hunt {
+      font-size: 13px;
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import { profile } from "../data/profile";
+---
+
+<section id="leadership" class="section alt" aria-labelledby="leadership-title">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Leadership &amp; activities</span>
+      <h2 id="leadership-title">
+        Beyond <span class="hl">testing</span>
+      </h2>
+    </div>
+    <ul class="lead">
+      {profile.activities.map((a, i) => (
+        <li class="ld card rv" style={`--d:${i * 0.08}s`}>
+          <small>{a.context}</small>
+          <h3>{a.role}</h3>
+          <p>{a.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .lead {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ld {
+    padding: 20px;
+    border-radius: 18px;
+  }
+
+  .ld small {
+    color: var(--g);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .ld h3 {
+    margin: 6px 0;
+    font-size: 17px;
+  }
+
+  .ld p {
+    margin: 0;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  @media (max-width: 1020px) {
+    .lead {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .lead {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

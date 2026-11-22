@@ -1,145 +1,666 @@
 ---
+import fs from "node:fs";
+import path from "node:path";
 import { profile } from "../data/profile";
-import GlanceCard from "./GlanceCard.astro";
+import Icon from "./Icon.astro";
+import BugButton from "./BugButton.astro";
 
 const { hero, contact } = profile;
-// Icon: Lucide "download" (ISC licence), inlined.
+
+// Use public/dulmi.jpg only if it exists, decided at build time so the
+// browser never requests a missing file. TODO: photo (optional), pending.
+const hasPhoto = fs.existsSync(
+  path.join(process.cwd(), "public", profile.photo.slice(1)),
+);
+
+const orbitList = hero.orbit.map((s) => s.label.toLowerCase());
+const orbitText = `${orbitList.slice(0, -1).join(", ")} and ${orbitList.at(-1)}`;
+const photoLabel = hasPhoto
+  ? `Photo of ${profile.shortName}, surrounded by her core skills: ${orbitText}`
+  : `${profile.shortName}'s initials, surrounded by her core skills: ${orbitText}`;
+
+// The radar sweep takes 9s per turn and starts at the top, clockwise. Each
+// skill lights up when the sweep passes it.
+const SWEEP_SECONDS = 9;
+const slots = hero.orbit.map((skill, i) => {
+  const fromTop = (i * 360) / hero.orbit.length;
+  return {
+    ...skill,
+    angle: fromTop - 90,
+    delay: (fromTop / 360) * SWEEP_SECONDS,
+  };
+});
+
+const [first, last] = [
+  profile.name.split(" ")[0],
+  profile.name.split(" ").slice(1).join(" "),
+];
 ---
 
-<section class="hero" aria-labelledby="hero-title">
-  <div class="hero-inner">
-    <div class="hero-text">
-      <p class="tag">
-        <span class="tag-dot" aria-hidden="true"></span>
+<section class="hero" id="top" aria-labelledby="hero-title" data-hero>
+  <div class="spot" aria-hidden="true"></div>
+  <BugButton section="top" position="top:18%;left:44%" />
+  <div class="wrap grid">
+    <div class="text">
+      <span class="open">
+        <i aria-hidden="true"></i>
         {hero.tag}
-      </p>
-
-      <h1 id="hero-title">{profile.name}</h1>
-
-      <p class="role">{hero.roleLine}</p>
-
-      <p class="intro">{hero.intro}</p>
-
-      <p class="meta">{profile.location}</p>
-
-      <div class="actions">
-        <a class="btn btn-primary" href="#contact">
-          Get in touch
-        </a>
-        <a class="btn btn-secondary" href={profile.cvUrl} download>
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            aria-hidden="true"
-            focusable="false"
+      </span>
+      <h1 class="hi" id="hero-title">
+        <span class="w" style="--d:0s">
+          Hi,
+        </span>{" "}
+        <span class="w" style="--d:.08s">
+          I'm
+        </span>{" "}
+        <span class="w hl" style="--d:.16s">
+          {first}
+        </span>{" "}
+        <br />
+        <span class="w" style="--d:.26s">
+          {last}
+        </span>
+      </h1>
+      <p class="role">
+        <span class="sr-only">{hero.roleLabel}</span>
+        <span aria-hidden="true">
+          {hero.rolePrefix}
+          <span class="sep"> · </span>
+          <span
+            class="type"
+            data-type
+            data-words={JSON.stringify(hero.typewriter)}
           >
-            <path d="M12 15V3M7 10l5 5 5-5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          </svg>
-          Download CV (PDF)
+            {hero.typewriter[0]}
+          </span>
+        </span>
+      </p>
+      <p class="lede">{hero.intro}</p>
+      <div class="cta">
+        <a class="btn solid" href="#projects">
+          View my work
         </a>
-        <a class="btn btn-secondary" href={contact.linkedin}>
-          LinkedIn<span class="sr-only"> profile</span>
-        </a>
-        <a class="btn btn-secondary" href={contact.github}>
-          GitHub<span class="sr-only"> profile</span>
+        <a
+          class="btn"
+          href={profile.cvUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon name="down" />
+          Download CV<span class="sr-only">{" (PDF, opens in a new tab)"}</span>
         </a>
       </div>
+      <ul class="social">
+        <li>
+          <a href={contact.linkedin} aria-label="LinkedIn profile">
+            <Icon name="in" />
+          </a>
+        </li>
+        <li>
+          <a href={contact.github} aria-label="GitHub profile">
+            <Icon name="gh" />
+          </a>
+        </li>
+        <li>
+          <a href={contact.medium} aria-label="Medium articles">
+            <Icon name="pen" />
+          </a>
+        </li>
+        <li>
+          <a href={`mailto:${contact.email}`} aria-label="Email">
+            <Icon name="mail" />
+          </a>
+        </li>
+      </ul>
+      <p class="huntnote js-only">
+        <Icon name="bug" />5 bugs are hiding on this page. Can you find them?
+      </p>
     </div>
 
-    <div class="hero-panel">
-      <GlanceCard />
+    <div class="photo" role="img" aria-label={photoLabel} data-photo>
+      <div class="ring"></div>
+      <div class="disc">
+        <div class="face">
+          {hasPhoto ? (
+            <img
+              src={profile.photo}
+              alt=""
+              width="400"
+              height="400"
+              decoding="async"
+            />
+          ) : (
+            <strong>{profile.initials}</strong>
+          )}
+          <div class="scan"></div>
+        </div>
+      </div>
+      <div class="sweep"></div>
+      <div class="orbit">
+        {slots.map((s) => (
+          <div class="slot" style={`--a:${s.angle}deg`}>
+            <div class="sk" style={`animation-delay:${s.delay}s`}>
+              <span class="ping" />
+              <Icon name={s.icon} />
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
 
+<script>
+  import { reduceMotion, finePointer } from "../scripts/motion";
+
+  // Typewriter role line. The first word is in the HTML, so it reads
+  // correctly without JS or under reduced motion.
+  const type = document.querySelector<HTMLElement>("[data-type]");
+  if (type && !reduceMotion()) {
+    const words: string[] = JSON.parse(type.dataset.words ?? "[]");
+    let w = 0;
+    let c = words[0].length;
+    let deleting = true;
+    const tick = () => {
+      const word = words[w];
+      c += deleting ? -1 : 1;
+      type.textContent = word.slice(0, c);
+      let wait = deleting ? 35 : 70;
+      if (!deleting && c === word.length) {
+        deleting = true;
+        wait = 1800;
+      } else if (deleting && c === 0) {
+        deleting = false;
+        w = (w + 1) % words.length;
+        wait = 300;
+      }
+      setTimeout(tick, wait);
+    };
+    setTimeout(tick, 2200);
+  }
+
+  // Mouse spotlight and 3D photo tilt: mouse/trackpad only, never under reduced motion.
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  const photo = document.querySelector<HTMLElement>("[data-photo]");
+  if (hero && photo && finePointer() && !reduceMotion()) {
+    hero.addEventListener("pointermove", (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      hero.style.setProperty("--my", `${e.clientY - r.top}px`);
+      const p = photo.getBoundingClientRect();
+      const x = (e.clientX - p.left) / p.width - 0.5;
+      const y = (e.clientY - p.top) / p.height - 0.5;
+      photo.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
+    });
+    hero.addEventListener("pointerleave", () => {
+      photo.style.transform = "";
+    });
+  }
+</script>
+
 <style>
   .hero {
-    background-color: var(--panel);
-    border-bottom: 1px solid var(--rule);
+    --mx: 70%;
+    --my: 40%;
+    position: relative;
+    overflow: hidden;
+    padding: clamp(48px, 7vw, 90px) 0;
   }
 
-  .hero-inner {
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 70% 40%, #000 10%, transparent 65%);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: -140px;
+    right: -150px;
+    width: 620px;
+    height: 620px;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--g) 22%, transparent),
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+
+  .spot {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(
+      420px circle at var(--mx) var(--my),
+      color-mix(in srgb, var(--g) 13%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .grid {
+    position: relative;
+    z-index: 1;
     display: grid;
-    gap: 36px;
-    max-width: 1240px;
-    margin-inline: auto;
-    padding: clamp(36px, 5vw, 72px) max(5vw, 16px);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 40px;
+    align-items: center;
   }
 
-  @media (min-width: 860px) {
-    .hero-inner {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-      align-items: center;
-      gap: clamp(40px, 5vw, 72px);
-    }
-  }
-
-  .tag {
+  .open {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 20px;
-    padding: 4px 12px;
-    border: 1.5px solid var(--green);
+    gap: 9px;
+    padding: 6px 14px;
     border-radius: 999px;
-    background-color: var(--bg);
-    color: var(--green);
-    font-size: 0.875rem; /* 14px */
+    background: var(--g2);
+    color: var(--g);
+    font-size: 14px;
     font-weight: 600;
   }
 
-  .tag-dot {
+  .open i {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: var(--green);
+    background: var(--g);
+    animation: pulse 2s infinite;
   }
 
-  h1 {
-    margin: 0;
+  .hi {
+    margin: 20px 0 14px;
+    font-size: clamp(42px, 6.2vw, 72px);
+    font-weight: 800;
+  }
+
+  .w {
+    display: inline-block;
+    animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: var(--d);
   }
 
   .role {
-    margin: 14px 0 0;
-    font-size: 1.1875rem; /* 19px */
-    font-weight: 600;
-    line-height: 1.35;
+    min-height: 1.4em;
+    margin-bottom: 16px;
+    font: 600 clamp(18px, 2.2vw, 23px) var(--font-head-stack);
   }
 
-  .intro {
-    margin: 16px 0 0;
+  .type {
+    color: var(--g);
   }
 
-  .meta {
-    margin: 12px 0 0;
+  .type::after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 3px;
+    vertical-align: -2px;
+    background: var(--g);
+    animation: blink 1s steps(1) infinite;
+  }
+
+  .lede {
+    max-width: 54ch;
+    margin-bottom: 28px;
     color: var(--mute);
-    font-size: 0.9375rem; /* 15px */
+    font-size: 17px;
   }
 
-  .actions {
+  .cta {
+    margin-bottom: 26px;
+  }
+
+  .social {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
-    margin-top: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  /* On narrow screens wrapped buttons fill their row. */
-  @media (max-width: 859.98px) {
-    .actions .btn {
-      flex: 1 1 auto;
+  .social a {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--ink);
+    transition:
+      border-color 0.2s,
+      color 0.2s,
+      transform 0.2s;
+  }
+
+  .social a:hover {
+    border-color: var(--g);
+    color: var(--g);
+    transform: translateY(-3px);
+  }
+
+  .open,
+  .role,
+  .lede,
+  .cta,
+  .social,
+  .huntnote {
+    animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .role {
+    animation-delay: 0.35s;
+  }
+
+  .lede {
+    animation-delay: 0.45s;
+  }
+
+  .cta {
+    animation-delay: 0.55s;
+  }
+
+  .social,
+  .huntnote {
+    animation-delay: 0.65s;
+  }
+
+  .huntnote {
+    align-items: center;
+    gap: 8px;
+    margin: 22px 0 0;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  :global(.js) .huntnote {
+    display: flex;
+  }
+
+  .huntnote :global(.i) {
+    width: 18px;
+    height: 18px;
+    color: var(--amber);
+  }
+
+  /* Photo frame */
+  .photo {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1;
+    margin-inline: auto;
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out;
+  }
+
+  .ring {
+    position: absolute;
+    inset: 0;
+    border: 2px dashed color-mix(in srgb, var(--g) 45%, transparent);
+    border-radius: 50%;
+  }
+
+  .disc {
+    position: absolute;
+    inset: 7%;
+    padding: 6px;
+    border-radius: 50%;
+    background: linear-gradient(
+      150deg,
+      var(--g),
+      color-mix(in srgb, var(--g) 30%, var(--bg2))
+    );
+  }
+
+  .face {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--bg2);
+  }
+
+  .face strong {
+    color: var(--g);
+    font: 800 clamp(56px, 9vw, 96px) / 1 var(--font-head-stack);
+  }
+
+  .face img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .scan {
+    position: absolute;
+    top: -40%;
+    right: 0;
+    left: 0;
+    height: 40%;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--g) 22%, transparent) 80%,
+      var(--g) 100%
+    );
+    opacity: 0.7;
+    animation: scan 3.6s ease-in-out infinite;
+  }
+
+  /* Radar sweep: a lit wedge on a ring outside the frame. */
+  .sweep {
+    position: absolute;
+    inset: -7%;
+    z-index: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0 300deg,
+      color-mix(in srgb, var(--g) 10%, transparent) 330deg,
+      color-mix(in srgb, var(--g) 45%, transparent) 359deg,
+      var(--g) 360deg
+    );
+    -webkit-mask: radial-gradient(
+      circle closest-side,
+      transparent 74%,
+      #000 75%
+    );
+    mask: radial-gradient(circle closest-side, transparent 74%, #000 75%);
+    pointer-events: none;
+    animation: spin 9s linear infinite;
+  }
+
+  .orbit {
+    position: absolute;
+    inset: 0;
+    container-type: size;
+    pointer-events: none;
+  }
+
+  .slot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: rotate(var(--a)) translateX(calc(50cqw + 6px))
+      rotate(calc(-1 * var(--a)));
+  }
+
+  .sk {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: 0 14px 30px -18px var(--shadow);
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    translate: -50% -50%;
+    animation: lit 9s linear infinite;
+  }
+
+  .sk :global(.i) {
+    width: 16px;
+    height: 16px;
+    color: var(--g);
+  }
+
+  .ping {
+    position: absolute;
+    inset: -1px;
+    border: 2px solid var(--g);
+    border-radius: 999px;
+    opacity: 0;
+    animation: ping 9s linear infinite;
+    animation-delay: inherit;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
     }
   }
 
-  /* Phones: two full-width main actions, then LinkedIn + GitHub side by side. */
-  @media (max-width: 519.98px) {
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--g) 55%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      top: -40%;
+    }
+    60%,
+    100% {
+      top: 100%;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes lit {
+    0% {
+      border-color: var(--g);
+      background: var(--g2);
+      color: var(--g);
+      transform: scale(1.08);
+    }
+    12% {
+      border-color: var(--line);
+      background: var(--card);
+      color: var(--ink);
+      transform: none;
+    }
+    100% {
+      border-color: var(--line);
+      background: var(--card);
+      color: var(--ink);
+    }
+  }
+
+  @keyframes ping {
+    0% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    10% {
+      opacity: 0;
+      transform: scale(1.45);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /*
+   * Where the longest typed phrase would not fit beside the prefix, it gets a
+   * line of its own, so typing never changes the line count (no layout shift).
+   */
+  @media (max-width: 1100px) {
+    .sep {
+      display: none;
     }
 
-    .actions .btn:nth-child(-n + 2) {
-      grid-column: 1 / -1;
+    .type {
+      display: block;
+      min-height: 1.4em;
+    }
+  }
+
+  /* Two narrow columns: shrink the frame so the side skills stay on screen. */
+  @media (min-width: 861px) and (max-width: 1140px) {
+    .photo {
+      max-width: calc(100% - 120px);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .photo {
+      order: -1;
+      max-width: 300px;
+      margin-block: 40px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    /* Leave room for the skills around the frame inside a 360px screen. */
+    .photo {
+      max-width: min(300px, calc(100vw - 130px));
+    }
+
+    .sk {
+      gap: 5px;
+      padding: 5px 9px;
+      font-size: 11.5px;
+    }
+
+    .sk :global(.i) {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scan,
+    .sweep {
+      display: none;
     }
   }
 </style>

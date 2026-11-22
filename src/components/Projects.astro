@@ -1,0 +1,536 @@
+---
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+
+const { caseStudy, projects, illustrations } = profile;
+const [coupon, marketplace] = projects;
+
+const CHECK = "M-5 0.5 -1.5 4 5.5 -3.5";
+const CROSS = "M-4 -4 4 4M4 -4 -4 4";
+
+const matrixCols = [240, 320, 402, 478];
+const flow = illustrations.orderFlow.map((label, i) => ({
+  label,
+  x: 56 + i * 102,
+  y: i % 2 ? 170 : 105,
+  labelY: i % 2 ? 210 : 75,
+}));
+---
+
+<section id="projects" class="section alt" aria-labelledby="projects-title">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Projects</span>
+      <h2 id="projects-title">
+        Projects I have <span class="hl">tested</span>
+      </h2>
+      <p class="sub">
+        My own QA case study first, then my work at MobiOS Private Limited.
+        Client screens are confidential, so those pictures are illustrations.
+      </p>
+    </div>
+
+    <div class="grid2">
+      <article class="proj feat gb card rv" data-tilt>
+        <div class="shot" aria-hidden="true">
+          <svg viewBox="0 0 520 300" data-testcases>
+            <rect class="frame" width="520" height="300" rx="14"></rect>
+            <rect class="chrome" width="520" height="38" rx="14"></rect>
+            <circle cx="20" cy="19" r="5" class="dot-r"></circle>
+            <circle cx="36" cy="19" r="5" class="dot-y"></circle>
+            <circle cx="52" cy="19" r="5" class="dot-g"></circle>
+            <text x="78" y="24" class="m" font-size="13">
+              docs/qa/test-cases.md
+            </text>
+            <rect
+              x="18"
+              y="52"
+              width="484"
+              height="30"
+              rx="6"
+              class="chrome"
+            ></rect>
+            <text x="30" y="72" class="m">
+              ID
+            </text>
+            <text x="86" y="72" class="m">
+              Test case
+            </text>
+            <text x="342" y="72" class="m">
+              Priority
+            </text>
+            <text x="420" y="72" class="m">
+              Status
+            </text>
+            {caseStudy.testCases.map((tc, i) => {
+              const y = 106 + i * 32;
+              return (
+                <g class="ck" style={`transition-delay:${i * 0.12}s`} data-tc>
+                  <line x1="18" x2="502" y1={y + 12} y2={y + 12} class="rule" />
+                  <text x="30" y={y} class="m">
+                    {tc.id}
+                  </text>
+                  <text x="86" y={y} class="ink">
+                    {tc.title}
+                  </text>
+                  <text x="342" y={y} class="m">
+                    {tc.priority}
+                  </text>
+                  <rect
+                    x="414"
+                    y={y - 14}
+                    width="56"
+                    height="20"
+                    rx="10"
+                    class="okbg"
+                  />
+                  <text
+                    x="442"
+                    y={y}
+                    text-anchor="middle"
+                    class="ok b"
+                    data-status
+                  >
+                    Pass
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+        <div class="pbody">
+          <span class="solo">
+            <Icon name="check" />
+            {caseStudy.badge}
+          </span>
+          <span class="kind">{caseStudy.kind}</span>
+          <h3>{caseStudy.name}</h3>
+          <p class="intro">{caseStudy.intro}</p>
+          <ul>
+            {caseStudy.points.map((p) => (
+              <li>{p}</li>
+            ))}
+          </ul>
+          <ul class="chips" aria-label="Skills used">
+            {caseStudy.chips.map((c) => (
+              <li class="chip">{c}</li>
+            ))}
+          </ul>
+          <div class="plinks">
+            {caseStudy.links.map((l) => (
+              <a class:list={["btn", { solid: l.primary }]} href={l.href}>
+                <Icon name={l.icon} />
+                {l.label}
+              </a>
+            ))}
+          </div>
+          <p class="note">{caseStudy.note}</p>
+        </div>
+      </article>
+
+      <article class="proj card rv" data-tilt>
+        <div class="shot" aria-hidden="true">
+          <svg viewBox="0 0 520 250">
+            <rect class="frame" width="520" height="250" rx="14"></rect>
+            <rect class="chrome" width="520" height="38" rx="14"></rect>
+            <circle cx="20" cy="19" r="5" class="dot-r"></circle>
+            <circle cx="36" cy="19" r="5" class="dot-y"></circle>
+            <circle cx="52" cy="19" r="5" class="dot-g"></circle>
+            <text x="78" y="24" class="m" font-size="13">
+              Role permission matrix
+            </text>
+            <text x="22" y="76" class="m">
+              Action
+            </text>
+            {illustrations.matrix.roles.map((r, j) => (
+              <text x={matrixCols[j]} y="76" text-anchor="middle" class="m">
+                {r}
+              </text>
+            ))}
+            {illustrations.matrix.rows.map((row, i) => (
+              <g>
+                <text x="22" y={114 + i * 38} class="ink">
+                  {row.action}
+                </text>
+                {row.allowed.map((yes, j) => (
+                  <g transform={`translate(${matrixCols[j]},${110 + i * 38})`}>
+                    <g
+                      class:list={["ck", yes ? "ok" : "no"]}
+                      style={`transition-delay:${(i * 4 + j) * 60}ms`}
+                    >
+                      <circle r="11" class="tint" />
+                      <path d={yes ? CHECK : CROSS} class="mark" />
+                    </g>
+                  </g>
+                ))}
+              </g>
+            ))}
+          </svg>
+        </div>
+        <div class="pbody">
+          <span class="kind">
+            {coupon.kind} · {coupon.company}
+          </span>
+          <h3>{coupon.name}</h3>
+          <ul>
+            {coupon.points.map((p) => (
+              <li>{p}</li>
+            ))}
+          </ul>
+          <ul class="chips" aria-label="Skills used">
+            {coupon.chips.map((c) => (
+              <li class="chip">{c}</li>
+            ))}
+          </ul>
+          <p class="note">{coupon.note}</p>
+        </div>
+      </article>
+
+      <article class="proj card rv" style="--d:.1s" data-tilt>
+        <div class="shot" aria-hidden="true">
+          <svg viewBox="0 0 520 250">
+            <rect class="frame" width="520" height="250" rx="14"></rect>
+            <rect class="chrome" width="520" height="38" rx="14"></rect>
+            <circle cx="20" cy="19" r="5" class="dot-r"></circle>
+            <circle cx="36" cy="19" r="5" class="dot-y"></circle>
+            <circle cx="52" cy="19" r="5" class="dot-g"></circle>
+            <text x="78" y="24" class="m" font-size="13">
+              Order workflow test
+            </text>
+            {flow.slice(0, -1).map((p, i) => (
+              <line
+                x1={p.x}
+                y1={p.y}
+                x2={flow[i + 1].x}
+                y2={flow[i + 1].y}
+                class="dash"
+              />
+            ))}
+            {flow.map((p, i) => (
+              <g>
+                <g
+                  class="ck ok"
+                  style={`transition-delay:${i * 180}ms`}
+                  transform={`translate(${p.x},${p.y})`}
+                >
+                  <circle r="20" class="tint" />
+                  <path d={CHECK} class="mark" transform="scale(1.3)" />
+                </g>
+                <text x={p.x} y={p.labelY} text-anchor="middle" class="ink">
+                  {p.label}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
+        <div class="pbody">
+          <span class="kind">
+            {marketplace.kind} · {marketplace.company}
+          </span>
+          <h3>{marketplace.name}</h3>
+          <ul>
+            {marketplace.points.map((p) => (
+              <li>{p}</li>
+            ))}
+          </ul>
+          <ul class="chips" aria-label="Skills used">
+            {marketplace.chips.map((c) => (
+              <li class="chip">{c}</li>
+            ))}
+          </ul>
+          <p class="note">{marketplace.note}</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reduceMotion, finePointer } from "../scripts/motion";
+
+  // Gentle 3D tilt on the project cards: mouse/trackpad only, never under reduced motion.
+  if (finePointer() && !reduceMotion()) {
+    document.querySelectorAll<HTMLElement>("[data-tilt]").forEach((card) => {
+      card.addEventListener("pointermove", (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(1000px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateY(-4px)`;
+      });
+      card.addEventListener("pointerleave", () => {
+        card.style.transform = "";
+      });
+    });
+  }
+</script>
+
+<style>
+  .grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .proj {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 22px;
+    transform-style: preserve-3d;
+    transition:
+      transform 0.25s,
+      box-shadow 0.25s,
+      opacity 0.7s ease;
+  }
+
+  .proj:hover {
+    box-shadow: 0 28px 50px -30px var(--g);
+  }
+
+  .shot {
+    padding: 22px 22px 0;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(160deg, var(--g2), var(--bg2));
+  }
+
+  .shot svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font: 12.5px var(--font-sans-stack);
+  }
+
+  .frame {
+    fill: var(--card);
+    stroke: var(--line);
+  }
+
+  .chrome {
+    fill: var(--bg2);
+  }
+
+  .dot-r {
+    fill: #f87171;
+  }
+
+  .dot-y {
+    fill: #fbbf24;
+  }
+
+  .dot-g {
+    fill: var(--g);
+  }
+
+  .m {
+    fill: var(--mute);
+  }
+
+  .ink {
+    fill: var(--ink);
+  }
+
+  .b {
+    font-weight: 700;
+  }
+
+  .rule {
+    stroke: var(--line);
+  }
+
+  .dash {
+    stroke: var(--line);
+    stroke-width: 2;
+    stroke-dasharray: 5 5;
+  }
+
+  .ok {
+    fill: var(--g);
+    color: var(--g);
+  }
+
+  .no {
+    color: #e05252;
+  }
+
+  .okbg {
+    fill: var(--g);
+    opacity: 0.18;
+  }
+
+  .tint {
+    fill: currentColor;
+    opacity: 0.16;
+  }
+
+  .mark {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Check marks pop in as the card is revealed (always visible without JS). */
+  :global(.js) .ck {
+    opacity: 0;
+    transform: scale(0.4);
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      opacity 0.35s,
+      transform 0.35s;
+  }
+
+  :global(.js) .proj:global(.seen) .ck {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pbody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+  }
+
+  .pbody > ul:not(.chips) {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--mute);
+    font-size: 15px;
+  }
+
+  .chips {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kind {
+    color: var(--g);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .intro {
+    margin: 0;
+    color: var(--mute);
+  }
+
+  .note {
+    margin: auto 0 0;
+    color: var(--mute);
+    font-size: 13px;
+  }
+
+  /* Featured case study */
+  .feat {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+
+  .feat h3 {
+    font-size: 22px;
+  }
+
+  .feat .shot {
+    display: flex;
+    align-items: center;
+    padding: 26px;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .feat .note {
+    margin-top: 0;
+  }
+
+  .solo {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--g);
+    color: var(--gtxt);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .solo :global(.i) {
+    width: 15px;
+    height: 15px;
+  }
+
+  .plinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  /* Animated border: a lit arc travels round the featured card. */
+  .gb {
+    position: relative;
+  }
+
+  .gb::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 2;
+    padding: 1px;
+    border-radius: 23px;
+    background: conic-gradient(
+      from var(--a, 0deg),
+      transparent 0 70%,
+      var(--g) 85%,
+      transparent
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: rot 6s linear infinite;
+  }
+
+  @property --a {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @keyframes rot {
+    to {
+      --a: 360deg;
+    }
+  }
+
+  @media (max-width: 1020px) {
+    .feat {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .feat .shot {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .grid2 {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 400px) {
+    .plinks .btn {
+      padding: 0 16px;
+    }
+  }
+</style>

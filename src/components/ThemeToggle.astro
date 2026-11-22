@@ -1,7 +1,7 @@
 ---
 // Light/dark theme toggle. The initial data-theme is set by the inline script
 // in BaseLayout; this component only switches and saves it.
-// Icons: Lucide "sun" and "moon" (ISC licence), inlined.
+import Icon from "./Icon.astro";
 ---
 
 <button
@@ -11,27 +11,8 @@
   aria-pressed="false"
   data-theme-toggle
 >
-  <svg
-    class="icon icon-moon"
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-  </svg>
-  <svg
-    class="icon icon-sun"
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <circle cx="12" cy="12" r="4"></circle>
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-  </svg>
+  <Icon name="moon" class="icon-moon" />
+  <Icon name="sun" class="icon-sun" />
 </button>
 
 <script>
@@ -86,44 +67,44 @@
   .theme-toggle {
     /* Hidden without JS (it could not work); BaseLayout adds .js before paint. */
     display: none;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
+    place-items: center;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    border: 1.5px solid var(--rule);
-    border-radius: 8px;
-    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--bg2);
     color: var(--ink);
     cursor: pointer;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
   }
 
   :global(.js) .theme-toggle {
-    display: inline-flex;
+    display: grid;
   }
 
   .theme-toggle:hover {
-    border-color: var(--ink);
+    border-color: var(--g);
+    color: var(--g);
   }
 
-  .icon {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  .theme-toggle :global(.i) {
+    width: 20px;
+    height: 20px;
   }
 
   /*
    * Moon in light theme, sun in dark theme. Driven by <html data-theme> so the
    * right icon shows from first paint, before this module script runs.
    */
-  .icon-sun,
-  :global([data-theme="dark"]) .icon-moon {
+  .theme-toggle :global(.icon-sun),
+  :global([data-theme="dark"]) .theme-toggle :global(.icon-moon) {
     display: none;
   }
 
-  :global([data-theme="dark"]) .icon-sun {
+  :global([data-theme="dark"]) .theme-toggle :global(.icon-sun) {
     display: block;
   }
 </style>

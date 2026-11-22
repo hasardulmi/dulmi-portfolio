@@ -1,0 +1,37 @@
+---
+import { profile } from "../data/profile";
+
+const year = new Date().getFullYear();
+---
+
+<footer>
+  <div class="wrap">
+    <span>
+      © {year} {profile.name}
+    </span>
+    <span>
+      BSc (Hons) <abbr title="Management and Information Technology">MIT</abbr>
+      {" · University of Kelaniya · final exams completed"}
+    </span>
+  </div>
+</footer>
+
+<style>
+  footer {
+    padding: 28px 0 88px;
+    border-top: 1px solid var(--line);
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  abbr {
+    text-decoration: none;
+  }
+</style>

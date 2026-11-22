@@ -1,12 +1,11 @@
 /**
- * Key figures for the hero "Profile at a glance" card. Derived from the
- * profile data (CLAUDE.md §9) so they can never drift from the facts.
+ * Key figures for the About stats. Derived from the profile data so they can
+ * never drift from the facts — never type these numbers in by hand.
  */
 import type { Profile } from "./profile";
 
 export interface Figure {
   value: number;
-  unit: string;
   label: string;
 }
 
@@ -17,7 +16,7 @@ export function monthsInclusive(start: string, end: string): number {
   return (ey - sy) * 12 + (em - sm) + 1;
 }
 
-export function glanceFigures(profile: Profile): Figure[] {
+export function keyFigures(profile: Profile): Figure[] {
   const internship = profile.experience[0];
   const platforms = profile.projects.length;
   // Roles per platform, summed: Super Admin exists on both platforms, so the
@@ -27,14 +26,16 @@ export function glanceFigures(profile: Profile): Figure[] {
   return [
     {
       value: monthsInclusive(internship.start, internship.end),
-      unit: "months",
-      label: `${internship.title.replace("Quality Assurance", "QA")} at ${internship.company.replace(" Private Limited", "")}`,
+      label: `months as a ${internship.title.replace("Quality Assurance", "QA")} at ${internship.company}`,
     },
-    { value: platforms, unit: "platforms", label: "tested end to end" },
+    { value: platforms, label: "multi-role platforms tested end to end" },
     {
       value: roles,
-      unit: "user roles",
-      label: `validated across ${platforms} platforms (RBAC)`,
+      label: `user roles validated across ${platforms} platforms`,
+    },
+    {
+      value: profile.articles.length,
+      label: "technical articles published on Medium",
     },
   ];
 }

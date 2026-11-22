@@ -23,7 +23,7 @@ test.describe("Home page smoke", () => {
       const body = getComputedStyle(document.body);
       return { bg: body.backgroundColor, font: body.fontFamily };
     });
-    expect(styles.bg).toBe("rgb(255, 255, 255)");
+    expect(styles.bg).toBe("rgb(245, 248, 251)");
     expect(styles.font).toContain("Inter Variable");
   });
 
@@ -67,12 +67,10 @@ test.describe("Home page smoke", () => {
     test(`has no serious or critical axe violations (${colorScheme})`, async ({
       page,
     }) => {
-      await page.emulateMedia({ colorScheme });
+      // Reduced motion: every reveal-on-scroll element is fully opaque, so
+      // contrast is checked on the final colours, not mid-fade.
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
       await page.goto("/");
-
-      // Include the open mobile menu where it exists.
-      const menu = page.getByRole("button", { name: "Menu" });
-      if (await menu.isVisible()) await menu.click();
 
       const results = await new AxeBuilder({ page }).analyze();
       const serious = results.violations.filter(

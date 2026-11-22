@@ -1,29 +1,34 @@
-/** Site structure: page sections and main navigation (CLAUDE.md §6). */
-
-export interface Section {
-  id: string;
-  title: string;
-}
+/** Site structure: nav tabs (CLAUDE.md §6). */
+import type { IconName } from "./icons";
 
 export interface NavLink {
   label: string;
   href: `#${string}`;
+  icon: IconName;
 }
 
-/** Page sections in order. Research is deliberately absent until its details exist. */
-export const sections: Section[] = [
-  { id: "experience", title: "Experience" },
-  { id: "projects", title: "Projects" },
-  { id: "skills", title: "Skills" },
-  { id: "writing", title: "Writing" },
-  { id: "education", title: "Education & certifications" },
-  { id: "contact", title: "Contact" },
+/** The 8 nav tabs, in page order. Contact has its own button. */
+export const navLinks: NavLink[] = [
+  { label: "Home", href: "#top", icon: "home" },
+  { label: "About", href: "#about", icon: "user" },
+  { label: "Skills", href: "#skills", icon: "list" },
+  { label: "Experience", href: "#experience", icon: "team" },
+  { label: "Projects", href: "#projects", icon: "code" },
+  { label: "Process", href: "#process", icon: "flow" },
+  { label: "Education", href: "#education", icon: "cap" },
+  { label: "Writing", href: "#writing", icon: "pen" },
 ];
 
-export const navLinks: NavLink[] = [
-  { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#projects" },
-  { label: "Skills", href: "#skills" },
-  { label: "Writing", href: "#writing" },
-  { label: "Contact", href: "#contact" },
-];
+/** Every section id on the page, in order (Research is absent until its details exist). */
+export const sectionIds = [
+  "top",
+  "about",
+  "skills",
+  "experience",
+  "projects",
+  "process",
+  "education",
+  "writing",
+  "leadership",
+  "contact",
+] as const;

@@ -1,0 +1,91 @@
+---
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+---
+
+<section id="experience" class="section" aria-labelledby="experience-title">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Experience</span>
+      <h2 id="experience-title">
+        Where I <span class="hl">learned on the job</span>
+      </h2>
+    </div>
+    {profile.experience.map((job) => (
+      <article class="exp card rv">
+        <div>
+          <span class="pill tabular">
+            <time datetime={job.start}>{job.dates.split(" – ")[0]}</time> –{" "}
+            <time datetime={job.end}>{job.dates.split(" – ")[1]}</time>
+          </span>
+          <h3>{job.title}</h3>
+          <p class="org">{job.company}</p>
+        </div>
+        <ul class="ticks">
+          {job.points.map((p) => (
+            <li>
+              <Icon name="check" />
+              {p}
+            </li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .exp {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: 28px;
+    padding: 30px;
+    border-radius: 22px;
+  }
+
+  .pill {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--g2);
+    color: var(--g);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  h3 {
+    font-size: 22px;
+  }
+
+  .org {
+    margin: 6px 0 0;
+    color: var(--mute);
+  }
+
+  .ticks {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ticks li {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ticks :global(.i) {
+    margin-top: 2px;
+    color: var(--g);
+  }
+
+  @media (max-width: 860px) {
+    .exp {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 24px;
+    }
+  }
+</style>

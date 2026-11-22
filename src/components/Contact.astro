@@ -1,0 +1,133 @@
+---
+import { profile } from "../data/profile";
+import Icon from "./Icon.astro";
+
+const { contact } = profile;
+const items = [
+  {
+    icon: "mail",
+    label: "Email",
+    detail: contact.email,
+    href: `mailto:${contact.email}`,
+  },
+  {
+    icon: "in",
+    label: "LinkedIn",
+    detail: contact.linkedinHandle,
+    href: contact.linkedin,
+  },
+  {
+    icon: "gh",
+    label: "GitHub",
+    detail: contact.githubHandle,
+    href: contact.github,
+  },
+  {
+    icon: "pen",
+    label: "Medium",
+    detail: contact.mediumHandle,
+    href: contact.medium,
+  },
+] as const;
+---
+
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="wrap">
+    <div class="contact card rv">
+      <h2 id="contact-title">
+        Let's <span class="hl">work together</span>
+      </h2>
+      <p class="sub">{profile.contactLine}</p>
+      <ul class="clist">
+        {items.map((c) => (
+          <li>
+            <a href={c.href}>
+              <Icon name={c.icon} />
+              {c.label}
+              <small>{c.detail}</small>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding-top: 0;
+  }
+
+  .contact {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 5vw, 56px);
+    border-radius: 26px;
+    text-align: center;
+  }
+
+  .contact::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    bottom: -160px;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--g) 20%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .clist {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: 30px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    padding: 18px 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    color: var(--ink);
+    font-size: 14px;
+    text-decoration: none;
+    transition:
+      border-color 0.2s,
+      transform 0.2s;
+  }
+
+  a:hover {
+    border-color: var(--g);
+    transform: translateY(-3px);
+  }
+
+  a :global(.i) {
+    color: var(--g);
+  }
+
+  small {
+    color: var(--mute);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 1020px) {
+    .clist {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

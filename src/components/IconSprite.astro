@@ -1,0 +1,15 @@
+---
+import { icons } from "../data/icons";
+---
+
+<svg
+  width="0"
+  height="0"
+  style="position:absolute;overflow:hidden"
+  aria-hidden="true"
+  focusable="false"
+>
+  {Object.entries(icons).map(([name, body]) => (
+    <symbol id={`i-${name}`} viewBox="0 0 24 24" set:html={body} />
+  ))}
+</svg>

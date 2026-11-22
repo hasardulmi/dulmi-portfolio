@@ -1,265 +1,274 @@
 ---
 import { profile } from "../data/profile";
 import { navLinks } from "../data/site";
+import Icon from "./Icon.astro";
 import ThemeToggle from "./ThemeToggle.astro";
-// Menu icons: Lucide "menu" and "x" (ISC licence), inlined.
 ---
 
+<div class="progress" aria-hidden="true" data-progress></div>
 <header class="site-header" data-site-header>
-  <nav class="nav" aria-label="Main">
-    <a class="nav-name" href="#top">
-      {profile.name}
-    </a>
+  <nav aria-label="Main">
+    <div class="wrap bar">
+      <a class="logo" href="#top">
+        <b aria-hidden="true">{profile.initials}</b>
+        {profile.shortName}
+        <span class="sr-only">
+          {profile.name.replace(profile.shortName, "")}
+        </span>
+      </a>
 
-    <div class="nav-actions">
-      {/*
-       * DOM order matters: the menu button comes before the links so that,
-       * on mobile, Tab moves from the button straight into the open menu.
-       */}
-      <button
-        type="button"
-        class="menu-button"
-        aria-expanded="false"
-        aria-controls="nav-links"
-        data-menu-button
-      >
-        <svg
-          class="icon icon-open"
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-        <svg
-          class="icon icon-close"
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path d="M18 6 6 18M6 6l12 12"></path>
-        </svg>
-        <span class="sr-only">Menu</span>
-      </button>
-
-      <ul class="nav-links" id="nav-links" data-nav-links>
+      <ul class="links" data-nav-links>
         {navLinks.map((link) => (
           <li>
-            <a href={link.href}>{link.label}</a>
+            <a href={link.href}>
+              <Icon name={link.icon} />
+              {link.label}
+            </a>
           </li>
         ))}
       </ul>
 
-      <ThemeToggle />
+      <div class="actions">
+        <ThemeToggle />
+        <a class="btn solid contact" href="#contact">
+          Contact me
+        </a>
+      </div>
     </div>
   </nav>
 </header>
 
 <script>
-  const header = document.querySelector<HTMLElement>("[data-site-header]");
-  const button =
-    document.querySelector<HTMLButtonElement>("[data-menu-button]");
-  const links = document.querySelector<HTMLElement>("[data-nav-links]");
-  const desktop = window.matchMedia("(min-width: 660px)");
+  import { reduceMotion } from "../scripts/motion";
+
+  const root = document.documentElement;
+  const header = document.querySelector<HTMLElement>("[data-site-header]")!;
+  const bar = document.querySelector<HTMLElement>("[data-nav-links]")!;
+  const progress = document.querySelector<HTMLElement>("[data-progress]")!;
+  const links = [...bar.querySelectorAll<HTMLAnchorElement>("a")];
+  const sections = links.map((a) =>
+    document.querySelector<HTMLElement>(a.getAttribute("href")!),
+  );
 
   // Expose the header height so anchor targets clear the sticky header.
-  if (header) {
-    const setHeight = () =>
-      document.documentElement.style.setProperty(
-        "--header-h",
-        `${header.offsetHeight}px`,
-      );
-    new ResizeObserver(setHeight).observe(header);
-    setHeight();
-  }
+  const setHeight = () =>
+    root.style.setProperty("--header-h", `${header.offsetHeight}px`);
+  new ResizeObserver(setHeight).observe(header);
+  setHeight();
 
-  const isOpen = () => button?.getAttribute("aria-expanded") === "true";
+  let current = -1;
 
-  const setOpen = (open: boolean) => {
-    button?.setAttribute("aria-expanded", String(open));
-    links?.toggleAttribute("data-open", open);
+  const update = () => {
+    const max = root.scrollHeight - root.clientHeight;
+    progress.style.transform = `scaleX(${max > 0 ? root.scrollTop / max : 0})`;
+
+    // Active tab: the last section whose top has passed just below the header.
+    const line = header.offsetHeight + 60;
+    let active = 0;
+    sections.forEach((s, i) => {
+      if (s && s.getBoundingClientRect().top < line) active = i;
+    });
+    if (active === current) return;
+    current = active;
+
+    links.forEach((a, i) => {
+      const on = i === active;
+      a.classList.toggle("on", on);
+      if (on) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+
+    // When the tabs scroll sideways (second row), keep the active one in view.
+    const a = links[active];
+    if (bar.scrollWidth > bar.clientWidth) {
+      bar.scrollTo({
+        left: a.offsetLeft - bar.clientWidth / 2 + a.offsetWidth / 2,
+        behavior: reduceMotion() ? "auto" : "smooth",
+      });
+    }
   };
 
-  button?.addEventListener("click", () => setOpen(!isOpen()));
+  let queued = false;
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      update();
+    });
+  };
 
-  // Close after choosing a link.
-  links?.addEventListener("click", (event) => {
-    if ((event.target as Element).closest("a")) setOpen(false);
-  });
-
-  // Escape closes and returns focus to the button.
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && isOpen()) {
-      setOpen(false);
-      button?.focus();
-    }
-  });
-
-  // Click outside the header closes.
-  document.addEventListener("click", (event) => {
-    if (isOpen() && header && !header.contains(event.target as Node)) {
-      setOpen(false);
-    }
-  });
-
-  // Growing past the breakpoint resets the menu.
-  desktop.addEventListener("change", () => setOpen(false));
+  addEventListener("scroll", onScroll, { passive: true });
+  addEventListener("resize", onScroll, { passive: true });
+  update();
 </script>
 
 <style>
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: 100%;
+    height: 3px;
+    background: var(--g);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
   .site-header {
     position: sticky;
     top: 0;
     z-index: 50;
-    background-color: var(--bg);
-    border-bottom: 1px solid var(--rule);
-    transition: background-color 0.2s ease;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
   }
 
-  .nav {
-    position: relative;
+  .bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 4px 12px;
-    max-width: 1240px;
-    margin-inline: auto;
-    padding: 10px max(5vw, 16px);
+    gap: 8px 16px;
+    min-height: 68px;
   }
 
-  .nav-name {
-    display: inline-flex;
+  .logo {
+    display: flex;
     align-items: center;
+    gap: 9px;
     min-height: 44px;
-    font-family: var(--font-serif-stack);
-    font-size: 1.1875rem; /* 19px */
-    font-weight: 650;
+    margin-inline-end: auto;
     color: var(--ink);
+    font: 700 21px var(--font-head-stack);
     text-decoration: none;
-    white-space: nowrap;
   }
 
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .logo b {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: var(--g);
+    color: var(--gtxt);
+    font-size: 15px;
   }
 
-  .nav-links {
+  .links {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0 2px;
+    gap: 4px;
     margin: 0;
-    padding: 0;
+    padding: 4px;
     list-style: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg2);
   }
 
-  .nav-links a {
+  .links li {
+    flex: none;
+  }
+
+  .links a {
     display: inline-flex;
     align-items: center;
+    gap: 7px;
     min-height: 44px;
-    padding: 0 6px;
-    border-radius: 8px;
+    padding: 0 14px;
+    border-radius: 999px;
     color: var(--ink);
-    font-size: 0.9375rem; /* 15px */
+    font-size: 14.5px;
     font-weight: 500;
     text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.25s,
+      color 0.25s;
   }
 
-  .nav-links a:hover {
-    text-decoration: underline;
-    text-decoration-color: var(--slate);
-    text-decoration-thickness: 2px;
+  .links a :global(.i) {
+    width: 16px;
+    height: 16px;
+    color: var(--g);
+    transition: color 0.25s;
   }
 
-  /* Icon-only (accessible name from visually hidden text), matches the theme toggle. */
-  .menu-button {
-    display: none;
+  .links a:hover {
+    background: var(--g2);
+  }
+
+  .links a.on {
+    background: var(--g);
+    color: var(--gtxt);
+  }
+
+  .links a.on :global(.i) {
+    color: var(--gtxt);
+  }
+
+  .links a:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .actions {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0;
-    border: 1.5px solid var(--rule);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--ink);
-    cursor: pointer;
+    gap: 10px;
   }
 
-  .menu-button:hover,
-  .menu-button[aria-expanded="true"] {
-    border-color: var(--ink);
-  }
-
-  .icon {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-  }
-
-  .icon-close,
-  .menu-button[aria-expanded="true"] .icon-open {
-    display: none;
-  }
-
-  .menu-button[aria-expanded="true"] .icon-close {
-    display: block;
+  .contact {
+    padding: 0 18px;
   }
 
   /*
-   * Below 660px the links collapse behind the menu button — only with JS.
-   * (660px is the narrowest width where name + links + toggle fit on one row.)
-   * Without JS the links stay visible and wrap, so they are always reachable.
-   * Keep in sync with the matchMedia query above and tests/nav.spec.ts.
+   * From 1440px the bar uses the full width so name, 8 tabs, toggle and
+   * Contact me fit on one row. Below that the tabs move to their own
+   * sideways-scrolling second row. Keep in sync with tests/nav.spec.ts.
    */
-  @media (max-width: 659.98px) {
-    :global(.js) .menu-button {
-      display: inline-flex;
+  @media (min-width: 1440px) {
+    .bar {
+      max-width: none;
+      padding-inline: 24px;
     }
 
-    :global(.js) .nav-links {
+    .links a {
+      padding: 0 12px;
+    }
+  }
+
+  @media (max-width: 1439.98px) {
+    .bar {
+      padding-block: 8px;
+    }
+
+    .links {
+      order: 3;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .links::-webkit-scrollbar {
       display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      flex-direction: column;
-      padding: 8px max(5vw, 16px) 16px;
-      background-color: var(--bg);
-      border-bottom: 1px solid var(--rule);
-    }
-
-    :global(.js) .nav-links[data-open] {
-      display: flex;
-    }
-
-    :global(.js) .nav-links a {
-      display: flex;
-      font-size: 1rem;
     }
   }
 
-  /*
-   * Safety net only: if a font renders wider than expected, wrap rather than
-   * overflow. The measured --header-h keeps anchors clear of a taller header.
-   */
-  @media (min-width: 660px) {
-    .nav-actions {
-      flex-wrap: wrap;
-      justify-content: flex-end;
+  @media (max-width: 400px) {
+    .bar {
+      column-gap: 8px;
     }
-  }
 
-  @media (min-width: 660px) and (max-width: 759.98px) {
-    .nav-name {
-      font-size: 1.0625rem; /* 17px */
+    .logo {
+      font-size: 19px;
+    }
+
+    .actions {
+      gap: 6px;
+    }
+
+    .contact {
+      padding: 0 14px;
     }
   }
 </style>

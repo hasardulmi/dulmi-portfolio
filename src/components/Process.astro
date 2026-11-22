@@ -1,0 +1,197 @@
+---
+import { profile } from "../data/profile";
+import BugButton from "./BugButton.astro";
+---
+
+<section id="process" class="section" aria-labelledby="process-title">
+  <BugButton section="process" position="bottom:40px;left:6%" />
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">My testing process</span>
+      <h2 id="process-title">
+        How I take a feature <span class="hl">from spec to release</span>
+      </h2>
+      <p class="sub">
+        The Software Testing Life Cycle I followed at MobiOS Private Limited and
+        on this portfolio. Scroll to watch each stage pass.
+      </p>
+    </div>
+    <div class="track" data-proc>
+      <div class="rail" aria-hidden="true">
+        <i data-rail></i>
+      </div>
+      <ol class="proc">
+        {profile.process.map((s, i) => (
+          <li class="stage" data-stage>
+            <span class="dot" aria-hidden="true">
+              {i + 1}
+            </span>
+            <h3>
+              <span class="sr-only">Stage {i + 1}: </span>
+              {s.title}
+            </h3>
+            <p>{s.description}</p>
+            <small>{s.output}</small>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { reduceMotion } from "../scripts/motion";
+
+  // The rail fills as the section scrolls through the viewport and each stage
+  // "passes" in turn. Under reduced motion every stage is shown as passed.
+  const proc = document.querySelector<HTMLElement>("[data-proc]");
+  const rail = document.querySelector<HTMLElement>("[data-rail]");
+  const stages = [...document.querySelectorAll<HTMLElement>("[data-stage]")];
+
+  if (proc && rail) {
+    const update = () => {
+      let p = 1;
+      if (!reduceMotion()) {
+        const r = proc.getBoundingClientRect();
+        const vh = innerHeight;
+        p = (vh * 0.8 - r.top) / (r.height + vh * 0.3);
+        p = Math.max(0, Math.min(1, p));
+      }
+      rail.style.setProperty("--p", String(p));
+      stages.forEach((el, i) =>
+        el.classList.toggle("on", p >= (i + 0.5) / stages.length),
+      );
+    };
+
+    let queued = false;
+    addEventListener(
+      "scroll",
+      () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          update();
+        });
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>
+
+<style>
+  .track {
+    position: relative;
+  }
+
+  .proc {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0;
+    padding: 44px 0 0;
+    list-style: none;
+  }
+
+  .rail {
+    position: absolute;
+    top: 21px;
+    right: 7%;
+    left: 7%;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--line);
+  }
+
+  .rail i {
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    background: var(--g);
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+    transition: transform 0.15s linear;
+  }
+
+  /* Without JS, show the full rail rather than an empty one. */
+  :global(html:not(.js)) .rail i {
+    transform: none;
+  }
+
+  .stage {
+    position: relative;
+    padding: 20px 16px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--card);
+    transition:
+      border-color 0.4s,
+      transform 0.4s,
+      box-shadow 0.4s;
+  }
+
+  .dot {
+    position: absolute;
+    top: -44px;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--mute);
+    font: 700 15px var(--font-head-stack);
+    translate: -50% 0;
+    transition: all 0.4s;
+  }
+
+  .stage:global(.on) {
+    border-color: var(--g);
+    box-shadow: 0 20px 40px -28px var(--g);
+    transform: translateY(-4px);
+  }
+
+  .stage:global(.on) .dot {
+    border-color: var(--g);
+    background: var(--g);
+    color: var(--gtxt);
+  }
+
+  .stage h3 {
+    margin: 10px 0 8px;
+    font-size: 16.5px;
+  }
+
+  .stage p {
+    margin: 0 0 10px;
+    color: var(--mute);
+    font-size: 14px;
+  }
+
+  .stage small {
+    display: block;
+    color: var(--g);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1020px) {
+    .proc {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: 60px;
+    }
+
+    .rail {
+      display: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .proc {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

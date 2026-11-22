@@ -1,0 +1,70 @@
+---
+import { profile, type BugSection } from "../data/profile";
+import Icon from "./Icon.astro";
+
+interface Props {
+  section: BugSection;
+  /** Absolute position inside the section, e.g. "top:18%;left:44%". */
+  position: string;
+}
+
+const { section, position } = Astro.props;
+---
+
+<button
+  type="button"
+  class="bug js-only"
+  style={position}
+  aria-label="Hidden bug: squash it"
+  data-bug={section}
+  data-msg={profile.bugs[section]}
+>
+  <Icon name="bug" />
+</button>
+
+<style>
+  .bug {
+    position: absolute;
+    z-index: 6;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--amber);
+    cursor: pointer;
+    opacity: 0.85;
+    animation: wig 3s ease-in-out infinite;
+  }
+
+  :global(.js) .bug {
+    display: grid;
+  }
+
+  .bug :global(.i) {
+    width: 24px;
+    height: 24px;
+  }
+
+  .bug:hover,
+  .bug:focus-visible {
+    opacity: 1;
+    background: color-mix(in srgb, var(--amber) 14%, transparent);
+  }
+
+  :global(.js) .bug[data-found] {
+    display: none;
+  }
+
+  @keyframes wig {
+    0%,
+    100% {
+      transform: rotate(-12deg);
+    }
+    50% {
+      transform: rotate(12deg) translateX(3px);
+    }
+  }
+</style>
